@@ -16,9 +16,7 @@ module.exports = function readFiles(options, deps, cb) {
         found = deps[file];
 
     if (!found) {
-      deps[file] = {
-        mtime: +fs.statSync(filepath).mtime
-      };
+      deps[file] = { mtime: 0 };
     } else if (!fs.existsSync(filepath)) {
       found.deleted = true;
       console.log('TODO: warn about orphans');
