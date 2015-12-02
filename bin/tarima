@@ -7,15 +7,19 @@ var pwd = process.cwd();
 
 run({
   src: path.join(pwd, 'src'),
-  dest: path.join(pwd, 'dest'),
+  dest: path.join(pwd, 'dest/build'),
   cache: path.join(pwd, 'dest/index.json'),
+  watch: process.argv.indexOf('--watch') > -1,
   filter: ['!**/_*', '!**/_*/**'],
   bundle: /index|main/,
-  watch: process.argv.indexOf('--watch') > -1
+  rename: {
+    less: 'css',
+    jade: 'html'
+  }
 }, function(err, result) {
   if (err) {
     console.log(err);
   }
 
-  console.log('DONE', result);
+  console.log('DONE', result.files);
 });

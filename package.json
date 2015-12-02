@@ -6,6 +6,7 @@
   },
   "dependencies": {
     "anymatch": "^1.3.0",
+    "async-parts": "^0.2.1",
     "chokidar": "^1.3.0",
     "fs-extra": "^0.26.2",
     "tarima": "^0.7.4"
