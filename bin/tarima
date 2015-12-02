@@ -1,0 +1,21 @@
+#!/usr/bin/env node
+
+var run = require('./'),
+    path = require('path');
+
+var pwd = process.cwd();
+
+run({
+  src: path.join(pwd, 'src'),
+  dest: path.join(pwd, 'dest'),
+  cache: path.join(pwd, 'dest/index.json'),
+  filter: ['!**/_*', '!**/_*/**'],
+  bundle: /index|main/,
+  watch: process.argv.indexOf('--watch') > -1
+}, function(err, result) {
+  if (err) {
+    console.log(err);
+  }
+
+  console.log('DONE', result);
+});
