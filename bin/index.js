@@ -1,4 +1,5 @@
-var fs = require('fs-extra');
+var fs = require('fs-extra'),
+    tarima = require('tarima');
 
 var readFiles = require('./read-files'),
     compileFiles = require('./compile-files');
@@ -24,3 +25,9 @@ module.exports = function(options, done) {
     });
   });
 };
+
+for (var key in tarima) {
+  if (Object.prototype.hasOwnProperty.call(tarima, key)) {
+    module.exports[key] = tarima[key];
+  }
+}
