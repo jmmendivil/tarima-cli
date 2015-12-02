@@ -11,7 +11,7 @@ module.exports = function readFiles(options, deps, cb) {
 
   var match = anymatch(['**'].concat(options.filter || []));
 
-  function append(file) {
+  function append(file, isDirty) {
     var filepath = path.join(options.src, file),
         found = deps[file];
 
@@ -23,16 +23,16 @@ module.exports = function readFiles(options, deps, cb) {
     } else {
       delete found.deleted;
 
-      if (found.deps) {
-        found.deps.forEach(function(id) {
-          if (append(id) && match(id)) {
+      if (isDirty) {
+        (found.deps || []).forEach(function(id) {
+          if (append(id, isDirty) && match(id)) {
             src.push(id);
           }
         });
       }
     }
 
-    if (!found || found.deleted || (+fs.statSync(filepath).mtime > found.mtime)) {
+    if (!found || isDirty || found.deleted || (+fs.statSync(filepath).mtime > found.mtime)) {
       return src.indexOf(file) === -1;
     }
   }
@@ -58,7 +58,7 @@ module.exports = function readFiles(options, deps, cb) {
         case 'add':
         case 'change':
         case 'unlink':
-          if (append(file) && match(file)) {
+          if (append(file, evt !== 'add') && match(file)) {
             src.push(file);
           }
 
