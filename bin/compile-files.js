@@ -37,6 +37,8 @@ module.exports = function compileFiles(options, result, cb) {
 
       fs.outputFileSync(dest, view.source);
 
+      result.dependencies[file].mtime = +fs.statSync(dest).mtime;
+
       track(file, view.required);
 
       next();
