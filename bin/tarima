@@ -10,11 +10,23 @@ run({
   dest: path.join(pwd, 'dest/build'),
   cache: path.join(pwd, 'dest/index.json'),
   watch: process.argv.indexOf('--watch') > -1,
-  filter: ['!**/_*', '!**/_*/**'],
+  ignore: ['!**/_*', '!**/_*/**'],
   bundle: /index|main/,
-  rename: {
-    less: 'css',
-    jade: 'html'
+  filter: function(partial) {
+    if (partial.ext === 'coffee') {
+      partial.parts.unshift('js');
+      partial.ext = 'js';
+    }
+
+    if (partial.ext === 'less') {
+      partial.parts.unshift('css');
+      partial.ext = 'css';
+    }
+
+    if (partial.ext === 'jade') {
+      partial.parts.unshift('html');
+      partial.ext = 'html';
+    }
   }
 }, function(err, result) {
   if (err) {

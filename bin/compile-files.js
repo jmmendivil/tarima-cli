@@ -27,13 +27,12 @@ module.exports = function compileFiles(options, result, cb) {
   function append(file) {
     return function(next) {
       var filepath = path.join(options.src, file),
-          partial = tarima.load(filepath);
+          partial = tarima.load(filepath, options);
 
       var data = partial.params.options.data || {},
           view = partial.data(data);
 
-      var ext = options.rename[partial.params.ext] || partial.params.ext,
-          dest = path.join(options.dest, file.replace(/\..+?$/, '.' + ext));
+      var dest = path.join(options.dest, file.replace(/\..+?$/, '.' + partial.params.ext));
 
       fs.outputFileSync(dest, view.source);
 

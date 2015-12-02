@@ -9,7 +9,7 @@ module.exports = function readFiles(options, deps, cb) {
   var ready,
       timeout;
 
-  var match = anymatch(['**'].concat(options.filter || []));
+  var match = anymatch(['**'].concat(options.ignore || []));
 
   function append(file, isDirty) {
     var filepath = path.join(options.src, file),
