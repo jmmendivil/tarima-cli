@@ -24,12 +24,16 @@ module.exports = function readFiles(options, deps, cb) {
       delete found.deleted;
 
       if (found.deps) {
-        console.log('TODO: append dependants');
+        found.deps.forEach(function(id) {
+          if (append(id) && match(id)) {
+            src.push(id);
+          }
+        });
       }
     }
 
     if (!found || found.deleted || (+fs.statSync(filepath).mtime > found.mtime)) {
-      return true;
+      return src.indexOf(file) === -1;
     }
   }
 
@@ -54,15 +58,13 @@ module.exports = function readFiles(options, deps, cb) {
         case 'add':
         case 'change':
         case 'unlink':
-          if (src.indexOf(file) === -1) {
-            if (append(file) && match(file)) {
-              src.push(file);
-            }
+          if (append(file) && match(file)) {
+            src.push(file);
+          }
 
-            if (ready) {
-              clearTimeout(timeout);
-              timeout = setTimeout(next, options.interval || 50, this);
-            }
+          if (ready) {
+            clearTimeout(timeout);
+            timeout = setTimeout(next, options.interval || 50, this);
           }
         break;
       }

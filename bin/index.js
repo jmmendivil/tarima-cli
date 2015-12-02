@@ -16,7 +16,7 @@ module.exports = function(options, done) {
       result.watcher.close();
     }
 
-    compileFiles(options, result.files, function(err) {
+    compileFiles(options, result, function(err) {
       if (options.cache) {
         fs.outputJsonSync(options.cache, result.dependencies);
       }
