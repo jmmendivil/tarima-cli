@@ -1,0 +1,13 @@
+{
+  "name": "tarima-cli",
+  "version": "0.0.0",
+  "bin": {
+    "tarima": "bin/tarima"
+  },
+  "dependencies": {
+    "anymatch": "^1.3.0",
+    "chokidar": "^1.3.0",
+    "fs-extra": "^0.26.2",
+    "tarima": "^0.7.4"
+  }
+}
