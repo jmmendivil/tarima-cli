@@ -12,21 +12,10 @@ run({
   watch: process.argv.indexOf('--watch') > -1,
   ignore: ['!**/_*', '!**/_*/**'],
   bundle: /index|main/,
-  filter: function(partial) {
-    if (partial.ext === 'coffee') {
-      partial.parts.unshift('js');
-      partial.ext = 'js';
-    }
-
-    if (partial.ext === 'less') {
-      partial.parts.unshift('css');
-      partial.ext = 'css';
-    }
-
-    if (partial.ext === 'jade') {
-      partial.parts.unshift('html');
-      partial.ext = 'html';
-    }
+  rename: {
+    coffee: 'js',
+    less: 'css',
+    jade: 'html'
   }
 }, function(err, result) {
   if (err) {

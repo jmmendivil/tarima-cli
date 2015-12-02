@@ -11,6 +11,23 @@ module.exports = function(options, done) {
     deps = fs.readJsonSync(options.cache);
   }
 
+  if (options.rename) {
+    var filter = options.filter;
+
+    options.filter = function(partial) {
+      var ext = options.rename[partial.ext];
+
+      if (ext) {
+        partial.parts.unshift(ext);
+        partial.ext = ext;
+      }
+
+      if (typeof filter === 'function') {
+        filter(partial);
+      }
+    };
+  }
+
   return readFiles(options, deps, function(result) {
     if (options.watch !== true) {
       result.watcher.close();
