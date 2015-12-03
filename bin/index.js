@@ -38,7 +38,7 @@ module.exports = function(options, done) {
         fs.outputJsonSync(options.cache, result.dependencies);
       }
 
-      done(err, result);
+      done(err);
     });
   });
 };

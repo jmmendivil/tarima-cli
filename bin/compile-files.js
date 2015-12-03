@@ -1,14 +1,18 @@
 var fs = require('fs-extra'),
     path = require('path'),
     tarima = require('tarima'),
+    webpack = require('webpack'),
+    anymatch = require('anymatch'),
     AsyncParts = require('async-parts');
 
 module.exports = function compileFiles(options, result, cb) {
-  var chain = new AsyncParts();
+  var match = anymatch(options.bundle || []),
+      chain = new AsyncParts(),
+      bases = [];
 
   function track(id, deps) {
     (deps || []).forEach(function(src) {
-      var entry = result.dependencies[path.relative(options.src, src)];
+      var entry = result.dependencies[src];
 
       if (!entry) {
         return;
@@ -24,31 +28,84 @@ module.exports = function compileFiles(options, result, cb) {
     });
   }
 
+  function bundle(next) {
+    var config = {
+      entry: {},
+      resolve: {
+        extensions: ['', '.js'],
+        modulesDirectories: ['node_modules']
+      },
+      output: {
+        path: options.dest,
+        filename: '[name]'
+      }
+    };
+
+    bases.forEach(function(id) {
+      var entry = result.dependencies[id];
+
+      // TODO: improve file naming
+      config.entry[entry.dest] = path.resolve(options.dest, entry.dest);
+    });
+
+    webpack(config, function(err, stats) {
+      var data = stats.toJson();
+
+      if (data.errors.length || data.warnings.length) {
+        return next([err].concat(data.errors, data.warnings).join('\n'));
+      }
+
+      var deps = data.modules.map(function(chunk) {
+        return result.dependencies[path.relative(options.dest, chunk.identifier)];
+      });
+
+      track(deps.shift(), deps);
+
+      next(err);
+    });
+  }
+
   function append(file) {
     return function(next) {
-      var filepath = path.join(options.src, file),
-          partial = tarima.load(filepath, options);
+      var partial = tarima.load(path.join(options.src, file), options);
 
       var data = partial.params.options.data || {},
           view = partial.data(data);
 
-      var dest = path.join(options.dest, file.replace(/\..+?$/, '.' + partial.params.ext));
+      var name = file.replace(/\..+?$/, '.' + partial.params.ext),
+          dest = path.join(options.dest, name);
 
       fs.outputFileSync(dest, view.source);
 
       result.dependencies[file].mtime = +fs.statSync(dest).mtime;
+      result.dependencies[file].dest = name;
+      result.dependencies[name] = file;
 
-      track(file, view.required);
+      if (view.required) {
+        track(file, view.required.map(function(src) {
+          return path.relative(options.src, src);
+        }));
+      }
 
       next();
     };
   }
 
   result.files.forEach(function(src) {
+    if (options.bundle && match(src)) {
+      if (bases.indexOf(src) === -1) {
+        bases.push(src);
+      }
+    }
+
     chain.then(append(src));
   });
 
   chain.run(function(err) {
-    cb(err);
+    if (!err) {
+      bundle(cb);
+    } else {
+      cb(err);
+    }
   });
 };

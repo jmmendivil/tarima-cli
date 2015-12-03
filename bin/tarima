@@ -10,17 +10,17 @@ run({
   dest: path.join(pwd, 'dest/build'),
   cache: path.join(pwd, 'dest/index.json'),
   watch: process.argv.indexOf('--watch') > -1,
+  bundle: /index\.(?:less|coffee)|(?:(\w+)\/\1\.(?!less))/,
   ignore: ['!**/_*', '!**/_*/**'],
-  bundle: /index|main/,
   rename: {
     coffee: 'js',
     less: 'css',
     jade: 'html'
   }
-}, function(err, result) {
+}, function(err) {
   if (err) {
-    console.log(err);
+    console.log(err.stack);
   }
 
-  console.log('DONE', result.files);
+  console.log('DONE');
 });
