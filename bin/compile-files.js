@@ -54,46 +54,42 @@ module.exports = function compileFiles(options, result, cb) {
     }
   }
 
-  function bundle(next) {
-    var config = {
-      entry: {},
-      resolve: {
-        extensions: ['', '.js'],
-        modulesDirectories: ['node_modules']
-      },
-      output: {
-        path: options.dest,
-        filename: options.output || '[name].js'
+  function bundle(entry) {
+    return function(next) {
+      if (entry.bundle.indexOf('.js') > -1) {
+        webpack({
+          entry: entry.dest,
+          resolve: {
+            extensions: ['', '.js'],
+            modulesDirectories: ['node_modules']
+          },
+          output: {
+            path: options.dest,
+            filename: path.relative(options.dest, entry.bundle)
+          }
+        }, function(err, stats) {
+          var data = stats.toJson();
+
+          if (data.errors.length || data.warnings.length) {
+            return next([err].concat(data.errors, data.warnings).join('\n'));
+          }
+
+          var deps = data.modules.map(function(chunk) {
+            return result.dependencies[chunk.identifier].src;
+          });
+
+          var id = deps.shift();
+
+          if (id) {
+            track(id, deps);
+          }
+
+          next(err);
+        });
+      } else {
+        next();
       }
     };
-
-    bases.forEach(function(src) {
-      var entry = result.dependencies[src];
-
-      if (entry.bundle.indexOf('.js') > -1) {
-        config.entry[path.relative(options.dest, entry.bundle.replace('.js', ''))] = entry.dest;
-      }
-    });
-
-    webpack(config, function(err, stats) {
-      var data = stats.toJson();
-
-      if (data.errors.length || data.warnings.length) {
-        return next([err].concat(data.errors, data.warnings).join('\n'));
-      }
-
-      var deps = data.modules.map(function(chunk) {
-        return result.dependencies[chunk.identifier].src;
-      });
-
-      var id = deps.shift();
-
-      if (id) {
-        track(id, deps);
-      }
-
-      next(err);
-    });
   }
 
   function append(file) {
@@ -134,11 +130,17 @@ module.exports = function compileFiles(options, result, cb) {
     chain.then(append(src));
   });
 
-  chain.run(function(err) {
-    if (!err) {
-      bundle(cb);
-    } else {
-      cb(err);
-    }
+  chain.then(function(next) {
+    bases.forEach(function(src) {
+      var entry = result.dependencies[src];
+
+      if (entry.bundle) {
+        chain.then(bundle(entry));
+      }
+    });
+
+    next();
   });
+
+  chain.run(cb);
 };
