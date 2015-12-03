@@ -70,7 +70,7 @@ module.exports = function compileFiles(options, result, cb) {
         }, function(err, stats) {
           var data = stats.toJson();
 
-          if (data.errors.length || data.warnings.length) {
+          if (err || data.errors.length || data.warnings.length) {
             return next([err].concat(data.errors, data.warnings).join('\n'));
           }
 
