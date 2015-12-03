@@ -28,6 +28,16 @@ module.exports = function(options, done) {
     };
   }
 
+  var replace = options.replace || '$1/$2.$3';
+
+  if (options.bundle === true) {
+    options.bundle = [/^(.+?)\/(\w+)\/(?:index|\2)\.((?!jade).*)$/, replace];
+  }
+
+  if (options.bundle instanceof RegExp) {
+    options.bundle = [options.bundle, replace];
+  }
+
   return readFiles(options, deps, function(result) {
     if (options.watch !== true) {
       result.watcher.close();

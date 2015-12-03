@@ -42,7 +42,6 @@ module.exports = function readFiles(options, deps, cb) {
   }
 
   function next() {
-    console.log(src);
     cb({
       files: src,
       watcher: this,

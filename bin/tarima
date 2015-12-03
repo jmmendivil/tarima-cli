@@ -10,8 +10,8 @@ run({
   dest: path.join(pwd, 'dest/build'),
   cache: path.join(pwd, 'dest/index.json'),
   watch: process.argv.indexOf('--watch') > -1,
-  bundle: /index\.(?:less|coffee)|(?:(\w+)\/\1\.(?!less))/,
   ignore: ['!**/_*', '!**/_*/**'],
+  bundle: true,
   rename: {
     coffee: 'js',
     less: 'css',

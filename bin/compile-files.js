@@ -2,12 +2,10 @@ var fs = require('fs-extra'),
     path = require('path'),
     tarima = require('tarima'),
     webpack = require('webpack'),
-    anymatch = require('anymatch'),
     AsyncParts = require('async-parts');
 
 module.exports = function compileFiles(options, result, cb) {
-  var match = anymatch(options.bundle || []),
-      chain = new AsyncParts(),
+  var chain = new AsyncParts(),
       bases = [];
 
   function sync(id, resolve) {
@@ -42,20 +40,39 @@ module.exports = function compileFiles(options, result, cb) {
     });
   }
 
+  function match(filepath) {
+    if (typeof options.bundle === 'function') {
+      return options.bundle(filepath);
+    }
+
+    if (Array.isArray(options.bundle)) {
+      var test = filepath.replace(options.bundle[0], options.bundle[1]);
+
+      if (test !== filepath) {
+        return test;
+      }
+    }
+  }
+
   function bundle(next) {
     var config = {
       entry: {},
+      resolve: {
+        extensions: ['', '.js'],
+        modulesDirectories: ['node_modules']
+      },
       output: {
         path: options.dest,
-        filename: '[name].js'
+        filename: options.output || '[name].js'
       }
     };
 
-    bases.forEach(function(id) {
-      var entry = result.dependencies[id],
-          file = path.relative(options.dest, entry.dest);
+    bases.forEach(function(src) {
+      var entry = result.dependencies[src];
 
-      config.entry[file.replace(/(\w+)\/(?:index|\1)\.js$/, '$1')] = entry.dest;
+      if (entry.bundle.indexOf('.js') > -1) {
+        config.entry[path.relative(options.dest, entry.bundle.replace('.js', ''))] = entry.dest;
+      }
     });
 
     webpack(config, function(err, stats) {
@@ -89,6 +106,10 @@ module.exports = function compileFiles(options, result, cb) {
       var name = file.replace(/\..+?$/, '.' + partial.params.ext),
           dest = path.join(options.dest, path.relative(options.src, name));
 
+      if (options.bundle && match(file)) {
+        result.dependencies[file].bundle = match(dest);
+      }
+
       fs.outputFileSync(dest, view.source);
 
       result.dependencies[file].dest = dest;
@@ -106,10 +127,8 @@ module.exports = function compileFiles(options, result, cb) {
   }
 
   result.files.forEach(function(src) {
-    if (options.bundle && match(src)) {
-      if (bases.indexOf(src) === -1) {
-        bases.push(src);
-      }
+    if (options.bundle && (bases.indexOf(src) === -1) && match(src)) {
+      bases.push(src);
     }
 
     chain.then(append(src));
