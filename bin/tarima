@@ -23,5 +23,5 @@ run({
     console.log(err.stack || err);
   }
 
-  console.log('DONE', result);
+  console.log(result.files.length + ' file(s) synced');
 });
