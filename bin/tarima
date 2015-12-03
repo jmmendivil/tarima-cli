@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+var start = new Date();
+
 var run = require('./'),
     path = require('path'),
     clc = require('cli-color');
@@ -12,7 +14,7 @@ run({
   cache: path.join(pwd, 'dest/index.json'),
   watch: process.argv.indexOf('--watch') > -1,
   ignored: ['**/{images,sprites,fonts,icons*,main,views,test,docs}/**'],
-  // exclude: ['!**/_*', '!**/_*/**'],
+  exclude: ['!**/_*', '!**/_*/**'],
   bundle: true,
   rename: {
     coffee: 'js',
@@ -27,6 +29,5 @@ run({
     console.log(clc.red(err.stack || err));
   }
 
-  console.log('|--------------------');
-  console.log(clc.cyan(result.files.length + ' file(s) synced'));
+  console.log(clc.cyan(result.files.length + ' file(s) synced in ' + (((new Date()) - start) / 1000) + 's'));
 });

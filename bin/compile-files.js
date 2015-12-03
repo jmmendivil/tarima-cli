@@ -60,13 +60,13 @@ module.exports = function compileFiles(options, result, cb) {
     }
   }
 
-  function bundle(id) {
+  function bundle(file) {
     return function(next) {
-      var entry = result.dependencies[id];
+      var entry = result.dependencies[file];
 
       if (entry.bundle && entry.bundle.indexOf('.js') > -1) {
         console.log('|--------------------');
-        console.log('|', path.relative(options.src, id));
+        console.log('|', clc.yellow(path.relative(options.dest, entry.dest)));
 
         webpack({
           entry: entry.dest,
@@ -112,7 +112,7 @@ module.exports = function compileFiles(options, result, cb) {
   function append(file) {
     return function(next) {
       console.log('|--------------------');
-      console.log('|', path.relative(options.src, file));
+      console.log('|', clc.cyan(path.relative(options.src, file)));
 
       var partial = tarima.load(file, options);
 
