@@ -39,7 +39,7 @@ module.exports = function(options, done) {
   }
 
   options.ignored = ['**/.*', '**/node_modules/**', '**/bower_components/**']
-    .concat(Array.isArray(options.ignored) ? options.ignored : (options.ignored ? [options.ignored] : []));
+    .concat(options.ignored ? (Array.isArray(options.ignored) ? options.ignored : [options.ignored]) : []);
 
   return readFiles(options, deps, function(result) {
     if (options.watch !== true) {
