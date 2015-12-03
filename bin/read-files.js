@@ -9,7 +9,7 @@ module.exports = function readFiles(options, deps, cb) {
   var ready,
       timeout;
 
-  var match = anymatch(['**'].concat(options.ignore || []));
+  var match = anymatch(['**'].concat(options.exclude || []));
 
   function append(filepath) {
     var entry = deps[filepath];
@@ -51,10 +51,19 @@ module.exports = function readFiles(options, deps, cb) {
     src = [];
   }
 
+  function add(file) {
+    append(path.join(options.src, file));
+
+    if (ready) {
+      clearTimeout(timeout);
+      timeout = setTimeout(next, options.interval || 50, this);
+    }
+  }
+
   return chokidar
     .watch('.', {
       cwd: options.src,
-      ignored: /\/\.\w+/,
+      ignored: options.ignored,
       ignoreInitial: false,
       followSymlinks: options.followSymlinks
     }).on('all', function(evt, file) {
@@ -62,14 +71,7 @@ module.exports = function readFiles(options, deps, cb) {
         case 'add':
         case 'change':
         case 'unlink':
-          var filepath = path.join(options.src, file);
-
-          append(filepath);
-
-          if (ready) {
-            clearTimeout(timeout);
-            timeout = setTimeout(next, options.interval || 50, this);
-          }
+          add(file);
         break;
       }
     }).on('ready', function() {

@@ -6,11 +6,12 @@ var run = require('./'),
 var pwd = process.cwd();
 
 run({
-  src: path.join(pwd, 'src'),
-  dest: path.join(pwd, 'dest/build'),
-  cache: path.join(pwd, 'dest/index.json'),
+  src: path.join(pwd, 'src/web'),
+  dest: path.join(pwd, 'generated/dest/build'),
+  cache: path.join(pwd, 'generated/dest/index.json'),
   watch: process.argv.indexOf('--watch') > -1,
-  ignore: ['!**/_*', '!**/_*/**'],
+  ignored: ['**/{images,sprites,fonts,icons*}/**'],
+  exclude: ['!**/_*', '!**/_*/**'],
   bundle: true,
   rename: {
     coffee: 'js',
