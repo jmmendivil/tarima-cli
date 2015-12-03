@@ -64,11 +64,7 @@ module.exports = function compileFiles(options, result, cb) {
     return function(next) {
       var entry = result.dependencies[id];
 
-      if (!entry.bundle) {
-        return;
-      }
-
-      if (entry.bundle.indexOf('.js') > -1) {
+      if (entry.bundle && entry.bundle.indexOf('.js') > -1) {
         console.log('|--------------------');
         console.log('|', path.relative(options.src, id));
 
