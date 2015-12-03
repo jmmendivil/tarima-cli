@@ -19,7 +19,7 @@ run({
   }
 }, function(err) {
   if (err) {
-    console.log(err.stack);
+    console.log(err.stack || err);
   }
 
   console.log('DONE');

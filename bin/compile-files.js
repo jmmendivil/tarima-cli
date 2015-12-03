@@ -10,42 +10,52 @@ module.exports = function compileFiles(options, result, cb) {
       chain = new AsyncParts(),
       bases = [];
 
+  function sync(id, resolve) {
+    var entry = result.dependencies[id];
+
+    if (!entry) {
+      return;
+    }
+
+    entry.mtime = +fs.statSync(entry.dest || id).mtime;
+
+    delete entry.dirty;
+
+    if (resolve) {
+      resolve(entry);
+    }
+  }
+
   function track(id, deps) {
-    (deps || []).forEach(function(src) {
-      var entry = result.dependencies[src];
+    sync(id);
 
-      if (!entry) {
-        return;
-      }
+    (deps || []).forEach(function(filepath) {
+      sync(filepath, function(entry) {
+        if (!entry.deps) {
+          entry.deps = [];
+        }
 
-      if (!entry.deps) {
-        entry.deps = [];
-      }
-
-      if (entry.deps.indexOf(id) === -1) {
-        entry.deps.push(id);
-      }
+        if (entry.deps.indexOf(id) === -1) {
+          entry.deps.push(id);
+        }
+      });
     });
   }
 
   function bundle(next) {
     var config = {
       entry: {},
-      resolve: {
-        extensions: ['', '.js'],
-        modulesDirectories: ['node_modules']
-      },
       output: {
         path: options.dest,
-        filename: '[name]'
+        filename: '[name].js'
       }
     };
 
     bases.forEach(function(id) {
-      var entry = result.dependencies[id];
+      var entry = result.dependencies[id],
+          file = path.relative(options.dest, entry.dest);
 
-      // TODO: improve file naming
-      config.entry[entry.dest] = path.resolve(options.dest, entry.dest);
+      config.entry[file.replace(/(\w+)\/(?:index|\1)\.js$/, '$1')] = entry.dest;
     });
 
     webpack(config, function(err, stats) {
@@ -56,10 +66,14 @@ module.exports = function compileFiles(options, result, cb) {
       }
 
       var deps = data.modules.map(function(chunk) {
-        return result.dependencies[path.relative(options.dest, chunk.identifier)];
+        return result.dependencies[chunk.identifier].src;
       });
 
-      track(deps.shift(), deps);
+      var id = deps.shift();
+
+      if (id) {
+        track(id, deps);
+      }
 
       next(err);
     });
@@ -67,25 +81,25 @@ module.exports = function compileFiles(options, result, cb) {
 
   function append(file) {
     return function(next) {
-      var partial = tarima.load(path.join(options.src, file), options);
+      var partial = tarima.load(file, options);
 
       var data = partial.params.options.data || {},
           view = partial.data(data);
 
       var name = file.replace(/\..+?$/, '.' + partial.params.ext),
-          dest = path.join(options.dest, name);
+          dest = path.join(options.dest, path.relative(options.src, name));
 
       fs.outputFileSync(dest, view.source);
 
-      result.dependencies[file].mtime = +fs.statSync(dest).mtime;
-      result.dependencies[file].dest = name;
-      result.dependencies[name] = file;
+      result.dependencies[file].dest = dest;
 
-      if (view.required) {
-        track(file, view.required.map(function(src) {
-          return path.relative(options.src, src);
-        }));
+      if (!result.dependencies[dest]) {
+        result.dependencies[dest] = {};
       }
+
+      result.dependencies[dest].src = file;
+
+      track(file, view.required);
 
       next();
     };

@@ -11,33 +11,38 @@ module.exports = function readFiles(options, deps, cb) {
 
   var match = anymatch(['**'].concat(options.ignore || []));
 
-  function append(file, isDirty) {
-    var filepath = path.join(options.src, file),
-        found = deps[file];
+  function append(filepath) {
+    var entry = deps[filepath];
 
-    if (!found) {
-      deps[file] = { mtime: 0 };
+    if (!entry) {
+      entry = deps[filepath] = {};
     } else if (!fs.existsSync(filepath)) {
-      found.deleted = true;
+      entry.deleted = true;
       console.log('TODO: warn about orphans');
     } else {
-      delete found.deleted;
-
-      if (isDirty) {
-        (found.deps || []).forEach(function(id) {
-          if (append(id, isDirty) && match(id)) {
-            src.push(id);
-          }
-        });
-      }
+      delete entry.deleted;
     }
 
-    if (!found || isDirty || found.deleted || (+fs.statSync(filepath).mtime > found.mtime)) {
-      return src.indexOf(file) === -1;
+    entry.dirty = !entry.mtime || entry.dirty || entry.deleted || (+fs.statSync(filepath).mtime > entry.mtime);
+
+    if (!entry.dirty) {
+      delete entry.dirty;
+    } else {
+      if (match(filepath) && (src.indexOf(filepath) === -1)) {
+        src.push(filepath);
+      }
+
+      (entry.deps || []).forEach(function(id) {
+        if (!deps[id].dirty) {
+          deps[id].dirty = true;
+          append(id);
+        }
+      });
     }
   }
 
   function next() {
+    console.log(src);
     cb({
       files: src,
       watcher: this,
@@ -58,9 +63,9 @@ module.exports = function readFiles(options, deps, cb) {
         case 'add':
         case 'change':
         case 'unlink':
-          if (append(file, evt !== 'add') && match(file)) {
-            src.push(file);
-          }
+          var filepath = path.join(options.src, file);
+
+          append(filepath);
 
           if (ready) {
             clearTimeout(timeout);
