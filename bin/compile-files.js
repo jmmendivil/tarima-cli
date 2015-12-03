@@ -1,4 +1,5 @@
 var fs = require('fs-extra'),
+    clc = require('cli-color'),
     path = require('path'),
     tarima = require('tarima'),
     webpack = require('webpack'),
@@ -6,7 +7,12 @@ var fs = require('fs-extra'),
 
 module.exports = function compileFiles(options, result, cb) {
   var chain = new AsyncParts(),
-      bases = [];
+      entries = [];
+
+  chain.catch(function(err, next) {
+    console.log(clc.red(err.message || err));
+    next();
+  });
 
   function sync(id, resolve) {
     var entry = result.dependencies[id];
@@ -54,14 +60,23 @@ module.exports = function compileFiles(options, result, cb) {
     }
   }
 
-  function bundle(entry) {
+  function bundle(id) {
     return function(next) {
+      var entry = result.dependencies[id];
+
+      if (!entry.bundle) {
+        return;
+      }
+
       if (entry.bundle.indexOf('.js') > -1) {
+        console.log('|--------------------');
+        console.log('|', path.relative(options.src, id));
+
         webpack({
           entry: entry.dest,
           resolve: {
             extensions: ['', '.js'],
-            modulesDirectories: ['node_modules']
+            modulesDirectories: ['web/api', 'web_modules', 'node_modules']
           },
           output: {
             path: options.dest,
@@ -74,14 +89,20 @@ module.exports = function compileFiles(options, result, cb) {
             return next([err].concat(data.errors, data.warnings).join('\n'));
           }
 
-          var deps = data.modules.map(function(chunk) {
-            return result.dependencies[chunk.identifier].src;
+          var deps = [];
+
+          data.modules.forEach(function(chunk) {
+            if (!result.dependencies[chunk.identifier]) {
+              return;
+            }
+
+            deps.push(result.dependencies[chunk.identifier].src);
           });
 
-          var id = deps.shift();
+          var src = deps.shift();
 
-          if (id) {
-            track(id, deps);
+          if (src) {
+            track(src, deps);
           }
 
           next(err);
@@ -94,6 +115,9 @@ module.exports = function compileFiles(options, result, cb) {
 
   function append(file) {
     return function(next) {
+      console.log('|--------------------');
+      console.log('|', path.relative(options.src, file));
+
       var partial = tarima.load(file, options);
 
       var data = partial.params.options.data || {},
@@ -123,20 +147,16 @@ module.exports = function compileFiles(options, result, cb) {
   }
 
   result.files.forEach(function(src) {
-    if (options.bundle && (bases.indexOf(src) === -1) && match(src)) {
-      bases.push(src);
+    if (options.bundle && (entries.indexOf(src) === -1) && match(src)) {
+      entries.push(src);
     }
 
     chain.then(append(src));
   });
 
   chain.then(function(next) {
-    bases.forEach(function(src) {
-      var entry = result.dependencies[src];
-
-      if (entry.bundle) {
-        chain.then(bundle(entry));
-      }
+    entries.forEach(function(src) {
+      chain.then(bundle(src));
     });
 
     next();

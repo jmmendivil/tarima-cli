@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 
 var run = require('./'),
-    path = require('path');
+    path = require('path'),
+    clc = require('cli-color');
 
 var pwd = process.cwd();
 
@@ -17,11 +18,14 @@ run({
     coffee: 'js',
     less: 'css',
     jade: 'html'
+  },
+  less: {
+    paths: [pwd]
   }
 }, function(err, result) {
   if (err) {
-    console.log(err.stack || err);
+    console.log(clc.red(err.stack || err));
   }
 
-  console.log(result.files.length + ' file(s) synced');
+  console.log(clc.cyan(result.files.length + ' file(s) synced'));
 });
