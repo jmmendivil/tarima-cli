@@ -1,4 +1,5 @@
 var fs = require('fs-extra'),
+    rimraf = require('rimraf'),
     tarima = require('tarima');
 
 var readFiles = require('./read'),
@@ -13,7 +14,12 @@ module.exports = function(options, done) {
     });
   }
 
-  var deps = options.dependencies || {};
+  var deps = {};
+
+  if (options.force) {
+    rimraf.sync(options.dest);
+    rimraf.sync(options.cache);
+  }
 
   if (fs.existsSync(options.cache)) {
     deps = fs.readJsonSync(options.cache);
