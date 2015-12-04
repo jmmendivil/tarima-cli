@@ -4,30 +4,33 @@ var start = new Date();
 
 var run = require('./'),
     path = require('path'),
-    clc = require('cli-color');
+    minimist = require('minimist');
 
-var pwd = process.cwd();
+var $ = require('./utils');
 
-run({
-  src: path.join(pwd, 'src'),
-  dest: path.join(pwd, 'dest/build'),
-  cache: path.join(pwd, 'dest/index.json'),
-  watch: process.argv.indexOf('--watch') > -1,
-  ignored: ['**/{images,sprites,fonts,icons*,main,views,test,docs}/**'],
-  exclude: ['!**/_*', '!**/_*/**'],
-  bundle: true,
-  rename: {
-    coffee: 'js',
-    less: 'css',
-    jade: 'html'
-  },
-  less: {
-    paths: [pwd]
-  }
-}, function(err, result) {
+var pwd = process.cwd(),
+    pkg = path.join(pwd, 'package.json');
+
+var argv = minimist(process.argv.slice(2));
+
+var fixedSrc = argv.src || argv._[0] || 'src',
+    fixedDest = argv.dest || argv._[1] || 'build';
+
+var defaultConfig = {
+  src: path.join(pwd, fixedSrc),
+  dest: path.join(pwd, fixedDest, 'dist'),
+  cache: path.join(pwd, fixedDest, 'index.json'),
+  watch: argv.watch
+};
+
+if ($.isFile(pkg)) {
+  defaultConfig = $.merge(defaultConfig, $.readJSON(pkg).tarima || {});
+}
+
+run(defaultConfig, function(err, result) {
   if (err) {
-    console.log(clc.red(err.stack || err));
+    console.log($.style('{red|%s}', err.stack || err));
   }
 
-  console.log(clc.cyan(result.files.length + ' file(s) synced in ' + (((new Date()) - start) / 1000) + 's'));
+  console.log($.style('{cyan|%s file(s) synced in %s}', result.files.length, $.timeDiff(start)));
 });

@@ -10,6 +10,7 @@
     "chokidar": "^1.3.0",
     "cli-color": "^1.1.0",
     "fs-extra": "^0.26.2",
+    "minimist": "^1.2.0",
     "tarima": "^0.7.4",
     "webpack": "^1.12.9"
   }
