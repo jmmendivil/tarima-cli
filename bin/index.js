@@ -5,6 +5,12 @@ var readFiles = require('./read'),
     compileFiles = require('./compile');
 
 module.exports = function(options, done) {
+  if (options.require) {
+    (!Array.isArray(options.require) ? [options.require] : options.require).forEach(function(file) {
+      require(file)(options);
+    });
+  }
+
   var deps = options.dependencies || {};
 
   if (fs.existsSync(options.cache)) {
