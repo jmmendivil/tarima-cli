@@ -77,6 +77,10 @@ function readJSON(filepath) {
   return fs.readJsonSync(filepath);
 }
 
+function writeJSON(filepath, data) {
+  fs.outputJsonSync(filepath, data);
+}
+
 function timeDiff(start) {
   var diff = (new Date()) - start;
 
@@ -95,6 +99,14 @@ function write(filepath, content) {
   return fs.outputFileSync(filepath, content);
 }
 
+function toArray(obj) {
+  if (!obj) {
+    return [];
+  }
+
+  return !Array.isArray(obj) ? [obj] : obj;
+}
+
 module.exports = {
   merge: merge,
   style: style,
@@ -102,7 +114,9 @@ module.exports = {
   isDir: isDir,
   isFile: isFile,
   readJSON: readJSON,
+  writeJSON: writeJSON,
   timeDiff: timeDiff,
   mtime: mtime,
-  write: write
+  write: write,
+  toArray: toArray
 };

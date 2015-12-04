@@ -1,24 +1,17 @@
-var fs = require('fs-extra'),
-    path = require('path'),
+var $ = require('./utils');
+
+var path = require('path'),
     rimraf = require('rimraf'),
     tarima = require('tarima');
 
 var readFiles = require('./read'),
     compileFiles = require('./compile');
 
-function toArray(obj) {
-  if (!obj) {
-    return [];
-  }
-
-  return !Array.isArray(obj) ? [obj] : obj;
-}
-
 module.exports = function(options, done) {
   options.compileOptions = options.compileOptions || {};
 
   if (options.require) {
-    toArray(options.require).forEach(function(file) {
+    $.toArray(options.require).forEach(function(file) {
       require(file)(options);
     });
   }
@@ -31,14 +24,14 @@ module.exports = function(options, done) {
     if (!options.delete) {
       rimraf.sync(options.dest);
     } else {
-      toArray(options.delete).forEach(function(dir) {
+      $.toArray(options.delete).forEach(function(dir) {
         rimraf.sync(path.join(options.dest, dir));
       });
     }
   }
 
-  if (fs.existsSync(options.cache)) {
-    deps = fs.readJsonSync(options.cache);
+  if ($.isFile(options.cache)) {
+    deps = $.readJSON(options.cache);
   }
 
   if (options.extensions) {
@@ -69,7 +62,7 @@ module.exports = function(options, done) {
   }
 
   options.ignored = ['**/.*', '**/node_modules/**', '**/bower_components/**']
-    .concat(toArray(options.ignored));
+    .concat($.toArray(options.ignored));
 
   return readFiles(options, deps, function(result) {
     if (options.watch !== true) {
@@ -78,7 +71,7 @@ module.exports = function(options, done) {
 
     compileFiles(options, result, function(err) {
       if (options.cache) {
-        fs.outputJsonSync(options.cache, result.dependencies);
+        $.writeJSON(options.cache, result.dependencies);
       }
 
       done(err, result);
