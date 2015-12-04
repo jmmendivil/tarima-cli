@@ -10,7 +10,7 @@ module.exports = function readFiles(options, deps, cb) {
   var ready,
       timeout;
 
-  var match = anymatch(['**'].concat(options.filtered || []));
+  var match = anymatch(options.filtered || ['**']);
 
   function append(filepath) {
     var entry = deps[filepath];
