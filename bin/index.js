@@ -1,8 +1,8 @@
 var fs = require('fs-extra'),
     tarima = require('tarima');
 
-var readFiles = require('./read-files'),
-    compileFiles = require('./compile-files');
+var readFiles = require('./read'),
+    compileFiles = require('./compile');
 
 module.exports = function(options, done) {
   var deps = options.dependencies || {};

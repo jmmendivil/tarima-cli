@@ -1,6 +1,6 @@
-var fs = require('fs-extra'),
-    clc = require('cli-color'),
-    path = require('path'),
+var $ = require('./utils');
+
+var path = require('path'),
     tarima = require('tarima'),
     webpack = require('webpack'),
     AsyncParts = require('async-parts');
@@ -10,7 +10,7 @@ module.exports = function compileFiles(options, result, cb) {
       entries = [];
 
   chain.catch(function(err, next) {
-    console.log(clc.red(err.message || err));
+    console.log($.style('{red|%s}', err.message || err));
     next();
   });
 
@@ -21,7 +21,7 @@ module.exports = function compileFiles(options, result, cb) {
       return;
     }
 
-    entry.mtime = +fs.statSync(entry.dest || id).mtime;
+    entry.mtime = $.mtime(entry.dest || id);
 
     delete entry.dirty;
 
@@ -66,7 +66,7 @@ module.exports = function compileFiles(options, result, cb) {
 
       if (entry.bundle && entry.bundle.indexOf('.js') > -1) {
         console.log('|--------------------');
-        console.log('|', clc.yellow(path.relative(options.dest, entry.dest)));
+        console.log('|', $.style('{yellow %s}', path.relative(options.dest, entry.dest)));
 
         webpack({
           entry: entry.dest,
@@ -112,7 +112,7 @@ module.exports = function compileFiles(options, result, cb) {
   function append(file) {
     return function(next) {
       console.log('|--------------------');
-      console.log('|', clc.cyan(path.relative(options.src, file)));
+      console.log('|', $.style('{yellow|%s}', path.relative(options.src, file)));
 
       var partial = tarima.load(file, options);
 
@@ -126,7 +126,7 @@ module.exports = function compileFiles(options, result, cb) {
         result.dependencies[file].bundle = match(dest);
       }
 
-      fs.outputFileSync(dest, view.source);
+      $.write(dest, view.source);
 
       result.dependencies[file].dest = dest;
 

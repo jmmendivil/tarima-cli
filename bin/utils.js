@@ -89,6 +89,14 @@ function timeDiff(start) {
   return diff + 'ms';
 }
 
+function mtime(filepath) {
+  return +fs.statSync(filepath).mtime;
+}
+
+function write(filepath, content) {
+  return fs.outputFileSync(filepath, content);
+}
+
 module.exports = {
   merge: merge,
   style: style,
@@ -96,5 +104,7 @@ module.exports = {
   isDir: isDir,
   isFile: isFile,
   readJSON: readJSON,
-  timeDiff: timeDiff
+  timeDiff: timeDiff,
+  mtime: mtime,
+  write: write
 };
