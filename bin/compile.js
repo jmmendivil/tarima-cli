@@ -66,7 +66,7 @@ module.exports = function compileFiles(options, result, cb) {
 
       if (entry.bundle && entry.bundle.indexOf('.js') > -1) {
         console.log('|--------------------');
-        console.log('|', $.style('{yellow %s}', path.relative(options.dest, entry.dest)));
+        console.log('|', $.style('{yellow|%s}', path.relative(options.dest, entry.dest)));
 
         webpack({
           entry: entry.dest,
