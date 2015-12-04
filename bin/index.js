@@ -11,11 +11,11 @@ module.exports = function(options, done) {
     deps = fs.readJsonSync(options.cache);
   }
 
-  if (options.rename) {
+  if (options.extensions) {
     var filter = options.filter;
 
     options.filter = function(partial) {
-      var ext = options.rename[partial.ext];
+      var ext = options.extensions[partial.ext];
 
       if (ext) {
         partial.parts.unshift(ext);
