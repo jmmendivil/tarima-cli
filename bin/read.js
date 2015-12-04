@@ -2,7 +2,7 @@ var $ = require('./utils');
 
 var path = require('path'),
     chokidar = require('chokidar'),
-    anymatch = require('anymatch');
+    micromatch = require('micromatch');
 
 module.exports = function readFiles(options, deps, cb) {
   var src = [];
@@ -10,7 +10,7 @@ module.exports = function readFiles(options, deps, cb) {
   var ready,
       timeout;
 
-  var match = anymatch(options.filtered || ['**']);
+  var match = micromatch.filter(['**'].concat(options.filtered || []));
 
   function append(filepath) {
     var entry = deps[filepath];
