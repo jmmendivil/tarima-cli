@@ -72,7 +72,8 @@ module.exports = function compileFiles(options, result, cb) {
           entry: entry.dest,
           resolve: {
             extensions: ['', '.js'],
-            modulesDirectories: ['web/api', 'web_modules', 'node_modules']
+            modulesDirectories: ['web_modules', 'node_modules']
+              .concat($.toArray(options.modules))
           },
           output: {
             path: options.dest,
