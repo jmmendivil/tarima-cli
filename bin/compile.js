@@ -114,7 +114,7 @@ module.exports = function compileFiles(options, result, cb) {
       console.log('|--------------------');
       console.log('|', $.style('{yellow|%s}', path.relative(options.src, file)));
 
-      var partial = tarima.load(file, options);
+      var partial = tarima.load(file, options.compileOptions || {});
 
       var data = partial.params.options.data || {},
           view = partial.data(data);

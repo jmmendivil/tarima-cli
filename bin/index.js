@@ -5,6 +5,8 @@ var readFiles = require('./read'),
     compileFiles = require('./compile');
 
 module.exports = function(options, done) {
+  options.compileOptions = options.compileOptions || {};
+
   if (options.require) {
     (!Array.isArray(options.require) ? [options.require] : options.require).forEach(function(file) {
       require(file)(options);
@@ -18,9 +20,9 @@ module.exports = function(options, done) {
   }
 
   if (options.extensions) {
-    var filter = options.filter;
+    var filter = options.compileOptions.filter;
 
-    options.filter = function(partial) {
+    options.compileOptions.filter = function(partial) {
       var ext = options.extensions[partial.ext];
 
       if (ext) {
