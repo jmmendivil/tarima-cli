@@ -1,15 +1,24 @@
 var fs = require('fs-extra'),
+    path = require('path'),
     rimraf = require('rimraf'),
     tarima = require('tarima');
 
 var readFiles = require('./read'),
     compileFiles = require('./compile');
 
+function toArray(obj) {
+  if (!obj) {
+    return [];
+  }
+
+  return !Array.isArray(obj) ? [obj] : obj;
+}
+
 module.exports = function(options, done) {
   options.compileOptions = options.compileOptions || {};
 
   if (options.require) {
-    (!Array.isArray(options.require) ? [options.require] : options.require).forEach(function(file) {
+    toArray(options.require).forEach(function(file) {
       require(file)(options);
     });
   }
@@ -17,8 +26,15 @@ module.exports = function(options, done) {
   var deps = {};
 
   if (options.force) {
-    rimraf.sync(options.dest);
     rimraf.sync(options.cache);
+
+    if (!options.delete) {
+      rimraf.sync(options.dest);
+    } else {
+      toArray(options.delete).forEach(function(dir) {
+        rimraf.sync(path.join(options.dest, dir));
+      });
+    }
   }
 
   if (fs.existsSync(options.cache)) {
@@ -53,7 +69,7 @@ module.exports = function(options, done) {
   }
 
   options.ignored = ['**/.*', '**/node_modules/**', '**/bower_components/**']
-    .concat(options.ignored ? (Array.isArray(options.ignored) ? options.ignored : [options.ignored]) : []);
+    .concat(toArray(options.ignored));
 
   return readFiles(options, deps, function(result) {
     if (options.watch !== true) {
