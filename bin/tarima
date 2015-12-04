@@ -11,10 +11,18 @@ var $ = require('./utils');
 var pwd = process.cwd(),
     pkg = path.join(pwd, 'package.json');
 
-var argv = minimist(process.argv.slice(2));
+var argv = minimist(process.argv.slice(2), {
+  boolean: ['force', 'watch'],
+  string: ['only'],
+  alias: {
+    f: 'force',
+    w: 'watch',
+    i: 'only'
+  }
+});
 
-var fixedSrc = argv.src || argv._[0] || 'src',
-    fixedDest = argv.dest || argv._[1] || 'build';
+var fixedSrc = argv._[0] || 'src',
+    fixedDest = argv._[1] || 'build';
 
 var defaultConfig = {
   src: path.join(pwd, fixedSrc),
@@ -26,6 +34,22 @@ var defaultConfig = {
 
 if ($.isFile(pkg)) {
   $.merge(defaultConfig, $.readJSON(pkg).tarima || {});
+}
+
+if (argv.only) {
+  if (!defaultConfig.filtered) {
+    defaultConfig.filtered = [];
+  }
+
+  var test = !Array.isArray(argv.only) ? argv.only.split(/[,:|]/) : argv.only;
+
+  defaultConfig.filtered.push(function(value) {
+    for (var key in test) {
+      if (value.indexOf(test[key]) > -1) {
+        return true;
+      }
+    }
+  });
 }
 
 run(defaultConfig, function(err, result) {
