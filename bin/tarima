@@ -24,7 +24,7 @@ var defaultConfig = {
 };
 
 if ($.isFile(pkg)) {
-  defaultConfig = $.merge(defaultConfig, $.readJSON(pkg).tarima || {});
+  $.merge(defaultConfig, $.readJSON(pkg).tarima || {});
 }
 
 run(defaultConfig, function(err, result) {

@@ -12,21 +12,19 @@ function env(value) {
 }
 
 function merge(target, source) {
-  if (!target) {
-    target = {};
-  }
-
   for (var key in source) {
     var value = source[key];
 
-    if (target[key] !== null && !Array.isArray(target[key]) && typeof target[key] === 'object') {
-      target[key] = merge(target[key], value);
+    if (!target[key]) {
+      target[key] = value;
+    }
+
+    if (value !== null && typeof value === 'object') {
+      merge(target[key], value);
     } else {
       target[key] = env(typeof value === 'undefined' ? target[key] : value);
     }
   }
-
-  return target;
 }
 
 function style(message) {
