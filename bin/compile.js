@@ -2,17 +2,12 @@ var $ = require('./utils');
 
 var path = require('path'),
     tarima = require('tarima'),
-    webpack = require('webpack'),
+    browserify = require('browserify'),
     AsyncParts = require('async-parts');
 
 module.exports = function compileFiles(options, result, cb) {
   var chain = new AsyncParts(),
       entries = [];
-
-  chain.catch(function(err, next) {
-    console.log($.style('{red|%s}', err.message || err));
-    next();
-  });
 
   function sync(id, resolve) {
     var entry = result.dependencies[id];
@@ -68,38 +63,37 @@ module.exports = function compileFiles(options, result, cb) {
         console.log('|--------------------');
         console.log('|', $.style('{yellow|%s}', path.relative(options.dest, entry.dest)));
 
-        webpack({
-          entry: entry.dest,
-          resolve: {
-            extensions: ['', '.js'],
-            modulesDirectories: ['web_modules', 'node_modules']
-              .concat($.toArray(options.modules))
-          },
-          output: {
-            path: options.dest,
-            filename: path.relative(options.dest, entry.bundle)
-          }
-        }, function(err, stats) {
-          var data = stats.toJson();
+        var deps = [];
 
-          if (err || data.errors.length || data.warnings.length) {
-            return next([err].concat(data.errors, data.warnings).join('\n'));
+        var b = browserify(entry.dest, {
+          paths: $.toArray(options.modules),
+          commondir: false,
+          detectGlobals: false,
+          insertGlobals: false,
+          bundleExternal: true
+        });
+
+        b.on('file', function(id) {
+          if (!result.dependencies[id]) {
+            return;
           }
 
-          var deps = [];
+          var src = result.dependencies[id].src;
 
-          data.modules.forEach(function(chunk) {
-            if (!result.dependencies[chunk.identifier]) {
-              return;
+          if (deps.indexOf(src) === -1) {
+            deps.push(src);
+          }
+        });
+
+        b.bundle(function(err, buffer) {
+          if (!err) {
+            var src = deps.shift();
+
+            if (src) {
+              track(src, deps);
             }
 
-            deps.push(result.dependencies[chunk.identifier].src);
-          });
-
-          var src = deps.shift();
-
-          if (src) {
-            track(src, deps);
+            $.write(entry.bundle, buffer.toString());
           }
 
           next(err);

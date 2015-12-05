@@ -9,6 +9,7 @@ var run = require('./'),
 var $ = require('./utils');
 
 var pwd = process.cwd(),
+    die = process.exit.bind(process),
     pkg = path.join(pwd, 'package.json');
 
 var argv = minimist(process.argv.slice(2), {
@@ -54,7 +55,8 @@ if (argv.only) {
 
 run(defaultConfig, function(err, result) {
   if (err) {
-    console.log($.style('{red|%s}', err.stack || err));
+    console.log($.style('{red|%s}', err.message || err));
+    die(1);
   }
 
   console.log($.style('{cyan|%s file(s) synced in %s}', result.files.length, $.timeDiff(start)));

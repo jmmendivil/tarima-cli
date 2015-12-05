@@ -5,14 +5,14 @@
     "tarima": "bin/tarima"
   },
   "dependencies": {
-    "async-parts": "^0.2.1",
+    "async-parts": "^0.2.2",
+    "browserify": "^12.0.1",
     "chokidar": "^1.3.0",
     "cli-color": "^1.1.0",
     "fs-extra": "^0.26.2",
     "micromatch": "^2.3.3",
     "minimist": "^1.2.0",
     "rimraf": "^2.4.4",
-    "tarima": "^0.7.6",
-    "webpack": "^1.12.9"
+    "tarima": "^0.7.6"
   }
 }
