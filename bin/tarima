@@ -13,7 +13,7 @@ var pwd = process.cwd(),
     pkg = path.join(pwd, 'package.json');
 
 var argv = minimist(process.argv.slice(2), {
-  boolean: ['force', 'watch'],
+  boolean: ['force', 'watch', 'verbose'],
   string: ['only'],
   alias: {
     f: 'force',
@@ -55,7 +55,7 @@ if (argv.only) {
 
 run(defaultConfig, function(err, result) {
   if (err) {
-    console.log($.style('{red|%s}', err.message || err));
+    console.log($.style('{red|%s}', argv.verbose && err.stack || err.message || err));
     die(1);
   }
 
