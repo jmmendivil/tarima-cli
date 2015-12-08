@@ -2,12 +2,25 @@ var $ = require('./utils');
 
 var path = require('path'),
     tarima = require('tarima'),
+    through = require('through'),
     browserify = require('browserify'),
     AsyncParts = require('async-parts');
 
+function isTemplate(src) {
+  return /\.(?:md|ract|jade|idom)/.test(src);
+}
+
+function isScript(src) {
+  return /\.(js|es6|imba|jisp|(?:lit)?coffee)/.test(src);
+}
+
 module.exports = function compileFiles(options, result, cb) {
-  var chain = new AsyncParts(),
-      entries = [];
+  var chain = new AsyncParts();
+
+  function log(id) {
+    console.log('|--------------------');
+    console.log('|', $.style('{magenta|%s}', path.relative(options.src, id)));
+  }
 
   function sync(id, resolve) {
     var entry = result.dependencies[id];
@@ -57,57 +70,65 @@ module.exports = function compileFiles(options, result, cb) {
 
   function bundle(file) {
     return function(next) {
-      var entry = result.dependencies[file];
+      log(file);
 
-      if (entry.bundle && entry.bundle.indexOf('.js') > -1) {
-        console.log('|--------------------');
-        console.log('|', $.style('{yellow|%s}', path.relative(options.dest, entry.dest)));
+      var dest,
+          deps = [];
 
-        var deps = [];
+      var b = browserify(file, {
+        paths: $.toArray(options.modules),
+        commondir: false,
+        detectGlobals: false,
+        insertGlobals: false,
+        bundleExternal: true,
+        extensions: ['.js', '.es6', '.imba', '.jisp', '.coffee', '.coffee.md', '.litcoffee', '.hbs', '.ejs']
+      });
 
-        var b = browserify(entry.dest, {
-          paths: $.toArray(options.modules),
-          commondir: false,
-          detectGlobals: false,
-          insertGlobals: false,
-          bundleExternal: true
-        });
+      b.on('file', function(id) {
+        if (result.dependencies[id] && (deps.indexOf(id) === -1)) {
+          deps.push(id);
+        }
+      });
 
-        b.on('file', function(id) {
-          if (!result.dependencies[id]) {
-            return;
+      b.transform(function(src) {
+        var code = '';
+
+        return through(function(buf) {
+          code += buf;
+        }, function() {
+          var partial = tarima.parse(src, code, options.compileOptions || {});
+
+          if ((src === file) && options.bundle) {
+            dest = match(path.join(options.dest, path.relative(options.src, src.replace(/\..+?$/, '.' + partial.params.ext))));
           }
 
-          var src = result.dependencies[id].src;
+          var data = partial.params.options.data || {},
+              view = partial.data(data);
 
-          if (deps.indexOf(src) === -1) {
-            deps.push(src);
-          }
+          this.queue(view.source);
+          this.queue(null);
         });
+      });
 
-        b.bundle(function(err, buffer) {
-          if (!err) {
-            var src = deps.shift();
+      b.bundle(function(err, buffer) {
+        if (!err) {
+          var src = deps.shift();
 
-            if (src) {
-              track(src, deps);
-            }
-
-            $.write(entry.bundle, buffer.toString());
+          if (src) {
+            track(src, deps);
           }
 
-          next(err);
-        });
-      } else {
-        next();
-      }
+          $.write(dest, buffer.toString());
+        }
+
+        next(err);
+      });
     };
   }
 
   function append(file) {
     return function(next) {
-      console.log('|--------------------');
-      console.log('|', $.style('{magenta|%s}', path.relative(options.src, file)));
+      log(file);
 
       var partial = tarima.load(file, options.compileOptions || {});
 
@@ -118,7 +139,7 @@ module.exports = function compileFiles(options, result, cb) {
           dest = path.join(options.dest, path.relative(options.src, name));
 
       if (options.bundle && match(file)) {
-        result.dependencies[file].bundle = match(dest);
+        dest = match(dest);
       }
 
       $.write(dest, view.source);
@@ -138,19 +159,15 @@ module.exports = function compileFiles(options, result, cb) {
   }
 
   result.files.forEach(function(src) {
-    if (options.bundle && (entries.indexOf(src) === -1) && match(src)) {
-      entries.push(src);
+    if (options.bundle) {
+      if (match(src)) {
+        chain.then((isScript(src) ? bundle : append)(src));
+      } else if (isTemplate(src)) {
+        chain.then(append(src));
+      }
+    } else {
+      chain.then(append(src));
     }
-
-    chain.then(append(src));
-  });
-
-  chain.then(function(next) {
-    entries.forEach(function(src) {
-      chain.then(bundle(src));
-    });
-
-    next();
   });
 
   chain.run(cb);
