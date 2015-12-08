@@ -22,6 +22,10 @@ module.exports = function compileFiles(options, result, cb) {
     console.log('|', $.style('{magenta|%s}', path.relative(options.src, id)));
   }
 
+  function dest(id, ext) {
+    return path.join(options.dest, path.relative(options.src, id.replace(/\..+?$/, '.' + ext)));
+  }
+
   function sync(id, resolve) {
     var entry = result.dependencies[id];
 
@@ -29,7 +33,7 @@ module.exports = function compileFiles(options, result, cb) {
       return;
     }
 
-    entry.mtime = $.mtime(entry.dest || id);
+    entry.mtime = $.mtime(id);
 
     delete entry.dirty;
 
@@ -72,8 +76,8 @@ module.exports = function compileFiles(options, result, cb) {
     return function(next) {
       log(file);
 
-      var dest,
-          deps = [];
+      var deps = [],
+          target;
 
       var b = browserify(file, {
         paths: $.toArray(options.modules),
@@ -99,7 +103,7 @@ module.exports = function compileFiles(options, result, cb) {
           var partial = tarima.parse(src, code, options.compileOptions || {});
 
           if ((src === file) && options.bundle) {
-            dest = match(path.join(options.dest, path.relative(options.src, src.replace(/\..+?$/, '.' + partial.params.ext))));
+            target = match(dest(src, partial.params.ext));
           }
 
           var data = partial.params.options.data || {},
@@ -118,7 +122,7 @@ module.exports = function compileFiles(options, result, cb) {
             track(src, deps);
           }
 
-          $.write(dest, buffer.toString());
+          $.write(target, buffer.toString());
         }
 
         next(err);
@@ -135,22 +139,13 @@ module.exports = function compileFiles(options, result, cb) {
       var data = partial.params.options.data || {},
           view = partial.data(data);
 
-      var name = file.replace(/\..+?$/, '.' + partial.params.ext),
-          dest = path.join(options.dest, path.relative(options.src, name));
+      var target = dest(file, partial.params.ext);
 
       if (options.bundle && match(file)) {
-        dest = match(dest);
+        target = match(target);
       }
 
-      $.write(dest, view.source);
-
-      result.dependencies[file].dest = dest;
-
-      if (!result.dependencies[dest]) {
-        result.dependencies[dest] = {};
-      }
-
-      result.dependencies[dest].src = file;
+      $.write(target, view.source);
 
       track(file, view.required);
 
