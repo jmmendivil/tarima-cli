@@ -103,7 +103,8 @@ module.exports = function compileFiles(options, result, cb) {
           var partial = tarima.parse(src, code, options.compileOptions || {});
 
           if ((src === file) && options.bundle) {
-            target = match(dest(src, partial.params.ext));
+            target = dest(src, partial.params.ext);
+            target = match(target) || target;
           }
 
           var data = partial.params.options.data || {},
@@ -159,6 +160,8 @@ module.exports = function compileFiles(options, result, cb) {
         chain.then((isScript(src) ? bundle : append)(src));
       } else if (isTemplate(src)) {
         chain.then(append(src));
+      } else if (isScript(src)) {
+        chain.then(bundle(src));
       }
     } else {
       chain.then(append(src));
