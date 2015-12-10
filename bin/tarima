@@ -13,9 +13,10 @@ var pwd = process.cwd(),
     pkg = path.join(pwd, 'package.json');
 
 var argv = minimist(process.argv.slice(2), {
-  boolean: ['force', 'watch', 'verbose'],
+  boolean: ['force', 'watch', 'bundle', 'verbose'],
   string: ['only'],
   alias: {
+    b: 'bundle',
     f: 'force',
     w: 'watch',
     i: 'only'
@@ -30,7 +31,14 @@ var defaultConfig = {
   dest: path.join(pwd, fixedDest, 'dist'),
   cache: path.join(pwd, fixedDest, 'index.json'),
   force: argv.force,
-  watch: argv.watch
+  watch: argv.watch,
+  bundle: argv.bundle,
+  filtered: ['!**/_*.*'],
+  extensions: {
+    jade: 'html',
+    less: 'css',
+    coffee: 'js'
+  }
 };
 
 if ($.isFile(pkg)) {
