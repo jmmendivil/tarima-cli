@@ -8,6 +8,24 @@ var readFiles = require('./read'),
     compileFiles = require('./compile');
 
 module.exports = function(options, done) {
+  var deps = {};
+
+  if (options.force) {
+    rimraf.sync(options.cache);
+
+    if (!options.delete) {
+      rimraf.sync(options.dest);
+    } else {
+      $.toArray(options.delete).forEach(function(dir) {
+        rimraf.sync(path.join(options.dest, dir));
+      });
+    }
+  }
+
+  if ($.isFile(options.cache)) {
+    deps = $.readJSON(options.cache);
+  }
+
   var _ = $.chain();
 
   options.compileOptions = options.compileOptions || {};
@@ -25,24 +43,6 @@ module.exports = function(options, done) {
         }
       });
     });
-  }
-
-  var deps = {};
-
-  if (options.force) {
-    rimraf.sync(options.cache);
-
-    if (!options.delete) {
-      rimraf.sync(options.dest);
-    } else {
-      $.toArray(options.delete).forEach(function(dir) {
-        rimraf.sync(path.join(options.dest, dir));
-      });
-    }
-  }
-
-  if ($.isFile(options.cache)) {
-    deps = $.readJSON(options.cache);
   }
 
   if (options.extensions) {
