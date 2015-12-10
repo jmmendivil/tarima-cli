@@ -80,7 +80,11 @@ module.exports = function(options, done) {
       result.watcher.close();
     }
 
-    function build() {
+    function build(error) {
+      if (error) {
+        return done(error, result);
+      }
+
       compileFiles(options, result, function(err) {
         if (options.cache) {
           $.writeJSON(options.cache, result.dependencies);
