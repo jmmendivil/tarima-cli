@@ -6,10 +6,6 @@ var path = require('path'),
     browserify = require('browserify'),
     AsyncParts = require('async-parts');
 
-function isTemplate(src) {
-  return /\.(?:md|ract|jade|idom)/.test(src);
-}
-
 function isScript(src) {
   return /\.(js|es6|imba|jisp|(?:lit)?coffee)/.test(src);
 }
@@ -156,13 +152,7 @@ module.exports = function compileFiles(options, result, cb) {
 
   result.files.forEach(function(src) {
     if (options.bundle) {
-      if (match(src)) {
-        chain.then((isScript(src) ? bundle : append)(src));
-      } else if (isTemplate(src)) {
-        chain.then(append(src));
-      } else if (isScript(src)) {
-        chain.then(bundle(src));
-      }
+      chain.then((isScript(src) ? bundle : append)(src));
     } else {
       chain.then(append(src));
     }
