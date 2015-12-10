@@ -38,9 +38,9 @@ module.exports = function(options, done) {
     var filter = options.compileOptions.filter;
 
     options.compileOptions.filter = function(partial) {
-      var ext = options.extensions[partial.ext];
+      var ext = options.extensions[partial.parts[0]];
 
-      if (ext) {
+      if (ext && (partial.parts.indexOf(ext) === -1)) {
         partial.parts.unshift(ext);
         partial.ext = ext;
       }
