@@ -8,11 +8,22 @@ var readFiles = require('./read'),
     compileFiles = require('./compile');
 
 module.exports = function(options, done) {
+  var _ = $.chain();
+
   options.compileOptions = options.compileOptions || {};
 
   if (options.require) {
     $.toArray(options.require).forEach(function(file) {
-      require(file)(options);
+      var cb = require(file);
+
+      _.then(function(next) {
+        if (cb.length === 2) {
+          cb(options, next);
+        } else {
+          cb(options);
+          next();
+        }
+      });
     });
   }
 
@@ -69,13 +80,17 @@ module.exports = function(options, done) {
       result.watcher.close();
     }
 
-    compileFiles(options, result, function(err) {
-      if (options.cache) {
-        $.writeJSON(options.cache, result.dependencies);
-      }
+    function build() {
+      compileFiles(options, result, function(err) {
+        if (options.cache) {
+          $.writeJSON(options.cache, result.dependencies);
+        }
 
-      done(err, result);
-    });
+        done(err, result);
+      });
+    }
+
+    _.run(build);
   });
 };
 

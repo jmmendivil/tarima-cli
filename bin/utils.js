@@ -1,5 +1,6 @@
 var fs = require('fs-extra'),
-    clc = require('cli-color');
+    clc = require('cli-color'),
+    AsyncParts = require('async-parts');
 
 function env(value) {
   if (typeof value === 'string') {
@@ -107,6 +108,16 @@ function toArray(obj) {
   return !Array.isArray(obj) ? [obj] : obj;
 }
 
+function chain(callback) {
+  var _ = new AsyncParts();
+
+  if (callback) {
+    _.catch(callback);
+  }
+
+  return _;
+}
+
 module.exports = {
   merge: merge,
   style: style,
@@ -118,5 +129,6 @@ module.exports = {
   timeDiff: timeDiff,
   mtime: mtime,
   write: write,
-  toArray: toArray
+  toArray: toArray,
+  chain: chain
 };

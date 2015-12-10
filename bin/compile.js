@@ -3,15 +3,14 @@ var $ = require('./utils');
 var path = require('path'),
     tarima = require('tarima'),
     through = require('through'),
-    browserify = require('browserify'),
-    AsyncParts = require('async-parts');
+    browserify = require('browserify');
 
 function isScript(src) {
   return /\.(js|es6|imba|jisp|(?:lit)?coffee)/.test(src);
 }
 
 module.exports = function compileFiles(options, result, cb) {
-  var chain = new AsyncParts();
+  var _ = $.chain();
 
   function log(id) {
     console.log('|--------------------');
@@ -152,11 +151,11 @@ module.exports = function compileFiles(options, result, cb) {
 
   result.files.forEach(function(src) {
     if (options.bundle) {
-      chain.then((isScript(src) ? bundle : append)(src));
+      _.then((isScript(src) ? bundle : append)(src));
     } else {
-      chain.then(append(src));
+      _.then(append(src));
     }
   });
 
-  chain.run(cb);
+  _.run(cb);
 };
