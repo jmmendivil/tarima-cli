@@ -14,9 +14,10 @@ var cwd = process.cwd(),
 
 var argv = minimist(process.argv.slice(2), {
   boolean: ['force', 'watch', 'bundle', 'verbose'],
-  string: ['only'],
+  string: ['only', 'exclude'],
   alias: {
     V: 'verbose',
+    x: 'exclude',
     b: 'bundle',
     f: 'force',
     w: 'watch',
@@ -51,12 +52,16 @@ if ($.isFile(pkg)) {
   $.merge(defaultConfig, $.readJSON(pkg).tarima || {});
 }
 
-if (argv.only) {
-  if (!defaultConfig.filtered) {
-    defaultConfig.filtered = [];
-  }
+if (!defaultConfig.filtered) {
+  defaultConfig.filtered = [];
+}
 
-  var test = !Array.isArray(argv.only) ? argv.only.split(/[,:|]/) : argv.only;
+function fixedArray(obj) {
+  return !Array.isArray(obj) ? obj.split(/[,:|]/) : obj;
+}
+
+if (argv.only) {
+  var test = fixedArray(argv.only);
 
   defaultConfig.filtered.push(function(value) {
     for (var key in test) {
@@ -64,6 +69,12 @@ if (argv.only) {
         return true;
       }
     }
+  });
+}
+
+if (argv.exclude) {
+  fixedArray(argv.exclude).forEach(function(skip) {
+    defaultConfig.filtered.push('!**/' + skip + '/**');
   });
 }
 
