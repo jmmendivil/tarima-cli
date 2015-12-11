@@ -69,20 +69,14 @@ if (argv.only) {
 
 run(defaultConfig, function(err, result) {
   if (err) {
-    if (Array.isArray(err.extract)) {
-      console.log($.style('{red|%s}', [
-        err.extract.join('\n'),
-        (new Array(err.column + 1)).join(' ') + '^',
-        '\n' + err.message
-      ].join('\n')));
-    } else {
-      console.log($.style('{red|%s}', argv.verbose && err.stack || err));
-    }
+    console.log($.style('{red|%s}', argv.verbose && err.stack || err));
 
     if (!argv.watch) {
       die(1);
     }
   }
 
-  console.log($.style('{cyan|%s file(s) synced in %s}', result.files.length, $.timeDiff(start)));
+  var suffix = argv.watch ? $.style('{blackBright|[ waiting for changes... ]}') : '';
+
+  console.log($.style('{cyan|%s file(s) synced in %s}', result.files.length, $.timeDiff(start)), suffix);
 });
