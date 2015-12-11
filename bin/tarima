@@ -36,6 +36,7 @@ var defaultConfig = {
   force: argv.force,
   watch: argv.watch,
   bundle: argv.bundle,
+  verbose: argv.verbose,
   filtered: ['!**/_*.*'],
   extensions: {
     hbs: 'html',
