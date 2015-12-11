@@ -2,11 +2,11 @@
 
 var start = new Date();
 
-var run = require('./'),
+var run = require('../lib'),
     path = require('path'),
     minimist = require('minimist');
 
-var $ = require('./utils');
+var $ = require('../lib/utils');
 
 var cwd = process.cwd(),
     die = process.exit.bind(process),
