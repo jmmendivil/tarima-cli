@@ -90,5 +90,9 @@ run(defaultConfig, function(err, result) {
 
   var suffix = argv.watch ? $.style('{blackBright|[ waiting for changes... ]}') : '';
 
-  console.log($.style('{cyan|%s file(s) synced in %s}', result.files.length, $.timeDiff(start)), suffix);
+  if (!result.files.length) {
+    console.log($.style('{blackBright|Without changes}'), suffix);
+  } else {
+    console.log($.style('{cyan|%s file(s) synced in %s}', result.files.length, $.timeDiff(start)), suffix);
+  }
 });
