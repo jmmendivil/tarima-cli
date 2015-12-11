@@ -8,7 +8,7 @@
   "dependencies": {
     "async-parts": "^0.2.2",
     "browserify": "^12.0.1",
-    "chokidar": "^1.4.0",
+    "chokidar": "^1.4.1",
     "cli-color": "^1.1.0",
     "fs-extra": "^0.26.2",
     "micromatch": "^2.3.5",
