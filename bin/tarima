@@ -16,6 +16,7 @@ var argv = minimist(process.argv.slice(2), {
   boolean: ['force', 'watch', 'bundle', 'verbose'],
   string: ['only'],
   alias: {
+    V: 'verbose',
     b: 'bundle',
     f: 'force',
     w: 'watch',
@@ -36,9 +37,13 @@ var defaultConfig = {
   bundle: argv.bundle,
   filtered: ['!**/_*.*'],
   extensions: {
+    hbs: 'html',
     jade: 'html',
     less: 'css',
-    coffee: 'js'
+    coffee: 'js',
+    ejs: 'js',
+    ract: 'js',
+    idom: 'js'
   }
 };
 
