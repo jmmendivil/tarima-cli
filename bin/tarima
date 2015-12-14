@@ -1,7 +1,5 @@
 #!/usr/bin/env node
 
-var start = new Date();
-
 var run = require('../lib'),
     path = require('path'),
     minimist = require('minimist');
@@ -93,6 +91,6 @@ run(defaultConfig, function(err, result) {
   if (!result.files.length) {
     console.log($.style('{blackBright|Without changes}'), suffix);
   } else {
-    console.log($.style('{cyan|%s file(s) synced in %s}', result.files.length, $.timeDiff(start)), suffix);
+    console.log($.style('{cyan|%s file(s) synced in %s}', result.files.length, $.timeDiff(result.start)), suffix);
   }
 });
