@@ -12,7 +12,7 @@ var cwd = process.cwd(),
 
 var argv = minimist(process.argv.slice(2), {
   boolean: ['force', 'watch', 'bundle', 'verbose', 'server', 'open'],
-  string: ['only', 'exclude', 'require', 'port', 'proxy', 'browser'],
+  string: ['only', 'exclude', 'require', 'port', 'proxy', 'browser', 'globals'],
   alias: {
     V: 'verbose',
     r: 'require',
@@ -25,7 +25,8 @@ var argv = minimist(process.argv.slice(2), {
     o: 'open',
     p: 'port',
     P: 'proxy',
-    B: 'browser'
+    B: 'browser',
+    g: 'globals'
   }
 });
 
@@ -86,6 +87,18 @@ if (argv.only) {
 if (argv.exclude) {
   fixedArray(argv.exclude).forEach(function(skip) {
     defaultConfig.filtered.push('!**/' + skip + '/**');
+  });
+}
+
+if (!defaultConfig.globals) {
+  defaultConfig.globals = {};
+}
+
+if (argv.globals) {
+  fixedArray(argv.globals).forEach(function(value) {
+    var parts = value.split('=');
+
+    defaultConfig.globals[parts[0]] = parts[1];
   });
 }
 
