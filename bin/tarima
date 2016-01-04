@@ -11,8 +11,8 @@ var cwd = process.cwd(),
     pkg = path.join(cwd, 'package.json');
 
 var argv = minimist(process.argv.slice(2), {
-  boolean: ['force', 'watch', 'bundle', 'verbose'],
-  string: ['only', 'exclude', 'require'],
+  boolean: ['force', 'watch', 'bundle', 'verbose', 'server', 'open'],
+  string: ['only', 'exclude', 'require', 'port', 'proxy', 'browser'],
   alias: {
     V: 'verbose',
     r: 'require',
@@ -20,7 +20,12 @@ var argv = minimist(process.argv.slice(2), {
     b: 'bundle',
     f: 'force',
     w: 'watch',
-    i: 'only'
+    i: 'only',
+    s: 'server',
+    o: 'open',
+    p: 'port',
+    P: 'proxy',
+    B: 'browser'
   }
 });
 
@@ -37,6 +42,11 @@ var defaultConfig = {
   bundle: argv.bundle,
   verbose: argv.verbose,
   require: argv.require,
+  server: argv.server,
+  open: argv.open,
+  port: argv.port,
+  proxy: argv.proxy,
+  browser: argv.browser,
   filtered: ['!**/_*.*'],
   extensions: {
     hbs: 'html',
