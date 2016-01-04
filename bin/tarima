@@ -12,9 +12,10 @@ var cwd = process.cwd(),
 
 var argv = minimist(process.argv.slice(2), {
   boolean: ['force', 'watch', 'bundle', 'verbose'],
-  string: ['only', 'exclude'],
+  string: ['only', 'exclude', 'require'],
   alias: {
     V: 'verbose',
+    r: 'require',
     x: 'exclude',
     b: 'bundle',
     f: 'force',
@@ -35,6 +36,7 @@ var defaultConfig = {
   watch: argv.watch,
   bundle: argv.bundle,
   verbose: argv.verbose,
+  require: argv.require,
   filtered: ['!**/_*.*'],
   extensions: {
     hbs: 'html',
