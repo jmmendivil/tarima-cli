@@ -69,7 +69,7 @@ if (!defaultConfig.filtered) {
 }
 
 function fixedArray(obj) {
-  return !Array.isArray(obj) ? obj.split(/[,:|]/) : obj;
+  return !Array.isArray(obj) ? obj.split(',') : obj;
 }
 
 if (argv.only) {
