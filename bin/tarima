@@ -90,15 +90,14 @@ if (argv.exclude) {
   });
 }
 
-if (!defaultConfig.globals) {
-  defaultConfig.globals = {};
-}
+defaultConfig.compileOptions = defaultConfig.compileOptions || {};
+defaultConfig.compileOptions.globals = defaultConfig.compileOptions.globals || {};
 
 if (argv.globals) {
   fixedArray(argv.globals).forEach(function(value) {
     var parts = value.split('=');
 
-    defaultConfig.globals[parts[0]] = parts[1];
+    defaultConfig.compileOptions.globals[parts[0]] = parts[1];
   });
 }
 
