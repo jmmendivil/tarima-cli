@@ -102,6 +102,7 @@ if (argv.globals) {
 }
 
 run(defaultConfig, function(err, result) {
+  // TODO: improve error handling
   if (err) {
     console.log($.style('{red|%s}', argv.verbose && err.stack || err));
 
