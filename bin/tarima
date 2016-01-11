@@ -119,7 +119,7 @@ run(defaultConfig, function(err, result) {
     console.log($.style('{cyan|%s file(s) synced in %s}', result.files.length, $.timeDiff(result.start)), suffix);
   }
 
-  if (cmd) {
+  if (cmd.length) {
     if (child) {
       child.kill();
     }
