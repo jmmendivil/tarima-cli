@@ -1,6 +1,6 @@
 {
   "name": "tarima-cli",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "main": "lib/index.js",
   "bin": {
     "tarima": "bin/tarima"
@@ -14,7 +14,7 @@
     "fs-extra": "^0.26.4",
     "micromatch": "^2.3.7",
     "minimist": "^1.2.0",
-    "tarima": "^0.7.8",
+    "tarima": "^0.7.9",
     "through": "^2.3.8"
   }
 }
