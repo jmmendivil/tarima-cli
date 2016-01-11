@@ -48,16 +48,7 @@ var defaultConfig = {
   port: argv.port,
   proxy: argv.proxy,
   browser: argv.browser,
-  filtered: ['!**/_*.*'],
-  extensions: {
-    hbs: 'html',
-    jade: 'html',
-    less: 'css',
-    coffee: 'js',
-    ejs: 'js',
-    ract: 'js',
-    idom: 'js'
-  }
+  filtered: ['!**/_*.*']
 };
 
 if ($.isFile(pkg)) {
