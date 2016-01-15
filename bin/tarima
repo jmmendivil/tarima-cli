@@ -97,10 +97,18 @@ if (argv.globals) {
 var cmd = argv['--'],
     child;
 
+function errLog(message) {
+  process.stderr.write($.color.red(message) + '\n');
+}
+
+function infoLog(message) {
+  process.stdout.write(message + '\n');
+}
+
 run(defaultConfig, function(err, result) {
   // TODO: improve error handling
   if (err) {
-    console.log($.style('{red|%s}', argv.verbose && err.stack || err));
+    errLog(argv.verbose && err.stack || err);
 
     if (!argv.watch) {
       if (child) {
@@ -114,30 +122,43 @@ run(defaultConfig, function(err, result) {
   var suffix = argv.watch ? $.style('\n> {green|waiting for changes...}') : '';
 
   if (!result.files.length) {
-    console.log($.style('{blackBright|Without changes}'), suffix);
+    infoLog($.style('{blackBright|Without changes}'), suffix);
   } else {
-    console.log($.style('{cyan|%s file(s) synced in %s}', result.files.length, $.timeDiff(result.start)), suffix);
+    infoLog($.style('{cyan|%s file(s) synced in %s}', result.files.length, $.timeDiff(result.start)), suffix);
   }
 
-  if (cmd.length) {
+  if (cmd.length && result.files.length) {
     if (child) {
       child.kill();
     }
 
     var start = new Date();
 
-    console.log($.style('> {cyan|%s} %s', cmd[0], cmd.slice(1).join(' ')));
+    infoLog($.style('> {cyan|%s} %s', cmd[0], cmd.slice(1).join(' ')));
 
     child = spawn(cmd[0], cmd.slice(1));
 
     child.stdout.pipe(process.stdout);
 
+    var errors = [];
+
     child.stderr.on('data', function(data) {
-      process.stderr.write('\n' + $.color.red(data.toString().trim()));
-    })
+      var line = data.toString().trim();
+
+      if (line) {
+        errors.push(line);
+      }
+    });
 
     child.on('close', function(exitCode) {
-      console.log($.style('> {cyan|%s} done in %s', cmd[0], $.timeDiff(start)));
+      infoLog($.style('> {%s|%s} done in %s', exitCode || errors.length ? 'red' : 'cyan', cmd[0], $.timeDiff(start)));
+
+      if (errors.length) {
+        errLog('\n' + errors.join('\n'));
+
+        // TODO: halt on this?
+        // exitCode = exitCode || !!(errLog.length);
+      }
 
       if (exitCode && !argv.watch) {
         die(exitCode);
