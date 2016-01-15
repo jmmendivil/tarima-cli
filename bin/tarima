@@ -111,7 +111,7 @@ run(defaultConfig, function(err, result) {
     }
   }
 
-  var suffix = argv.watch ? $.style('{blackBright|[ waiting for changes... ]}') : '';
+  var suffix = argv.watch ? $.style('\n> {green|waiting for changes...}') : '';
 
   if (!result.files.length) {
     console.log($.style('{blackBright|Without changes}'), suffix);
@@ -129,12 +129,17 @@ run(defaultConfig, function(err, result) {
     console.log($.style('> {cyan|%s} %s', cmd[0], cmd.slice(1).join(' ')));
 
     child = spawn(cmd[0], cmd.slice(1));
-    // TODO: how to handle this output?
-    // child.stdout.pipe(process.stdout);
+
+    child.stdout.pipe(process.stdout);
+
+    child.stderr.on('data', function(data) {
+      process.stderr.write('\n' + $.color.red(data.toString().trim()));
+    })
+
     child.on('close', function(exitCode) {
       console.log($.style('> {cyan|%s} done in %s', cmd[0], $.timeDiff(start)));
 
-      if (exitCode) {
+      if (exitCode && !argv.watch) {
         die(exitCode);
       }
     });
