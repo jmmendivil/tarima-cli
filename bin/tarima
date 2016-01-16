@@ -129,7 +129,7 @@ run(defaultConfig, function(err, result) {
     infoLog($.style('{cyan|%s file(s) synced in %s}', result.files.length, $.timeDiff(result.start)), suffix);
   }
 
-  if (cmd.length && result.files.length) {
+  if (cmd.length && result.files.length && !err) {
     if (child) {
       child.kill();
     }
