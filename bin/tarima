@@ -84,8 +84,7 @@ var defaultConfig = {
   open: argv.open,
   port: argv.port,
   proxy: argv.proxy,
-  browser: argv.browser,
-  filtered: ['!**/_*.*']
+  browser: argv.browser
 };
 
 if ($.isFile(pkg)) {
