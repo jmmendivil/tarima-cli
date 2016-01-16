@@ -116,7 +116,7 @@ if (argv.exclude) {
   fixedArray(argv.exclude).forEach(function(skip) {
     if (skip.indexOf('*') > -1) {
       defaultConfig.filtered.push('!' + skip);
-    } else if (skip.chartAt() === '.') {
+    } else if (skip.substr(0, 1) === '.') {
       defaultConfig.filtered.push('!**/*' + skip);
     } else if (skip.indexOf('.') > -1) {
       defaultConfig.filtered.push('!**/' + skip);
