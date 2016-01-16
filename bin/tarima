@@ -106,6 +106,8 @@ function infoLog(message) {
 }
 
 run(defaultConfig, function(err, result) {
+  var onError = this.emit.bind(null, 'error');
+
   // TODO: improve error handling
   if (err) {
     errLog(argv.verbose && err.stack || err);
@@ -155,6 +157,7 @@ run(defaultConfig, function(err, result) {
 
       if (errors.length) {
         errLog('\n' + errors.join('\n'));
+        onError(errors.join('\n'));
 
         // TODO: halt on this?
         // exitCode = exitCode || !!(errLog.length);
