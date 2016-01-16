@@ -165,9 +165,9 @@ run(defaultConfig, function(err, result) {
   var suffix = argv.watch ? $.style('\n> {green|waiting for changes...}') : '';
 
   if (!result.files.length) {
-    infoLog($.style('{blackBright|Without changes}'), suffix);
+    infoLog($.style('{blackBright|Without changes (%s)}', $.timeDiff(result.start)) + suffix);
   } else {
-    infoLog($.style('{cyan|%s file(s) synced in %s}', result.files.length, $.timeDiff(result.start)), suffix);
+    infoLog($.style('{cyan|%s file(s) synced in %s}', result.files.length, $.timeDiff(result.start)) + suffix);
   }
 
   if (cmd.length && result.files.length && !err) {
