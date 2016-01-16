@@ -9,12 +9,14 @@ var $ = require('../lib/utils');
 
 var cwd = process.cwd(),
     die = process.exit.bind(process),
-    pkg = path.join(cwd, 'package.json');
+    pkg = path.join(cwd, 'package.json'),
+    thisPkg = require(path.join(__dirname, '../package.json'));
 
 var argv = minimist(process.argv.slice(2), {
   boolean: ['force', 'watch', 'bundle', 'verbose', 'server', 'open'],
   string: ['only', 'exclude', 'require', 'port', 'proxy', 'browser', 'globals'],
   alias: {
+    v: 'version',
     V: 'verbose',
     r: 'require',
     x: 'exclude',
@@ -27,10 +29,43 @@ var argv = minimist(process.argv.slice(2), {
     p: 'port',
     P: 'proxy',
     B: 'browser',
-    g: 'globals'
+    G: 'globals'
   },
   '--': true
 });
+
+if (argv.help) {
+  console.log('USAGE:\n  ' + Object.keys(thisPkg.bin)[0] + ' [SRC] [DEST] [OPTIONS]');
+  console.log(function() {/*---
+OPTIONS:
+  -V, --verbose   Increase log information
+  -r, --require   Load scripts at startup (e.g. -r some-module -r ./lib/hooks.js)
+  -x, --exclude   Filter out sources using globs (e.g. -x test/broken -x .coffee)
+                  Example patterns:
+                    - *foo     -> !*foo
+                    - .bar     -> !**\/*.bar
+                    - x.y      -> !**\/x.y
+                    - foo      -> !**\/foo/**
+                    - foo/bar  -> !**\/foo\/bar/**
+  -i, --only      Filter out non-matching sources using String.prototype.indexOf()
+  -f, --force     Compile all sources always
+  -w, --watch     Enable file watching for all sources
+  -b, --bundle    Enable script bundling via Browserify (styles, views, etc.)
+  -s, --server    Enable web-server support via BrowserSync
+                  You can configure this through `serverOptions`
+  -o, --open      Enable to open your default (or configured) --browser
+  -p, --port      Set a different port for BrowserSync (default: 3000)
+  -P, --proxy     Enable proxying instead --server (e.g. -P localhost:8080)
+  -B, --browser   Set a custom browser when --open is specified
+  -G, --globals   Set custom values to inject on compiled scripts (e.g. -G FOO=BAR)
+---*/}.toString().match(/---([\s\S]+)---/)[1].replace(/\\/g, ''));
+  die(1);
+}
+
+if (argv.version) {
+  console.log(thisPkg.name + ' v' + thisPkg.version);
+  die(1);
+}
 
 var fixedSrc = argv._[0] || 'src',
     fixedDest = argv._[1] || 'build';
@@ -79,7 +114,15 @@ if (argv.only) {
 
 if (argv.exclude) {
   fixedArray(argv.exclude).forEach(function(skip) {
-    defaultConfig.filtered.push('!**/' + skip + '/**');
+    if (skip.indexOf('*') > -1) {
+      defaultConfig.filtered.push('!' + skip);
+    } else if (skip.chartAt() === '.') {
+      defaultConfig.filtered.push('!**/*' + skip);
+    } else if (skip.indexOf('.') > -1) {
+      defaultConfig.filtered.push('!**/' + skip);
+    } else {
+      defaultConfig.filtered.push('!**/' + skip + '/**');
+    }
   });
 }
 
