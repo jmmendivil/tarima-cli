@@ -84,15 +84,17 @@ var defaultConfig = {
   open: argv.open,
   port: argv.port,
   proxy: argv.proxy,
-  browser: argv.browser
+  browser: argv.browser,
+  filtered: [],
+  extensions: {},
+  serverOptions: {},
+  compileOptions: {
+    globals: {}
+  }
 };
 
 if ($.isFile(pkg)) {
   $.merge(defaultConfig, $.readJSON(pkg).tarima || {});
-}
-
-if (!defaultConfig.filtered) {
-  defaultConfig.filtered = [];
 }
 
 function fixedArray(obj) {
@@ -124,9 +126,6 @@ if (argv.exclude) {
     }
   });
 }
-
-defaultConfig.compileOptions = defaultConfig.compileOptions || {};
-defaultConfig.compileOptions.globals = defaultConfig.compileOptions.globals || {};
 
 if (argv.globals) {
   fixedArray(argv.globals).forEach(function(value) {
