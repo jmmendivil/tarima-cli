@@ -15,7 +15,7 @@
     "micromatch": "^2.3.7",
     "minimist": "^1.2.0",
     "pretty-ms": "^2.1.0",
-    "tarima": "^0.7.10",
+    "tarima": "^0.8.0",
     "through": "^2.3.8"
   }
 }
