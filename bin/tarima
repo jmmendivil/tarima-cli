@@ -14,8 +14,9 @@ var cwd = process.cwd(),
 
 var argv = minimist(process.argv.slice(2), {
   boolean: ['force', 'watch', 'bundle', 'verbose', 'server', 'open'],
-  string: ['only', 'exclude', 'require', 'port', 'proxy', 'browser', 'globals'],
+  string: ['only', 'exclude', 'require', 'port', 'proxy', 'browser', 'globals', 'config'],
   alias: {
+    c: 'config',
     v: 'version',
     V: 'verbose',
     r: 'require',
@@ -38,6 +39,7 @@ if (argv.help) {
   console.log('USAGE:\n  ' + Object.keys(thisPkg.bin)[0] + ' [SRC] [DEST] [OPTIONS]');
   console.log(function() {/*---
 OPTIONS:
+  -c, --config    Use configuration file
   -V, --verbose   Increase log information
   -r, --require   Load scripts at startup (e.g. -r some-module -r ./lib/hooks.js)
   -x, --exclude   Filter out sources using globs (e.g. -x test/broken -x .coffee)
@@ -95,6 +97,10 @@ var defaultConfig = {
 
 if ($.isFile(pkg)) {
   $.merge(defaultConfig, $.readJSON(pkg).tarima || {});
+}
+
+if ($.isFile(argv.config)) {
+  $.merge(defaultConfig, $.readJSON(argv.config) || {});
 }
 
 function fixedArray(obj) {
