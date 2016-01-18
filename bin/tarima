@@ -10,6 +10,7 @@ var $ = require('../lib/utils');
 var cwd = process.cwd(),
     die = process.exit.bind(process),
     pkg = path.join(cwd, 'package.json'),
+    bower = path.join(cwd, 'bower.json'),
     thisPkg = require(path.join(__dirname, '../package.json'));
 
 var argv = minimist(process.argv.slice(2), {
@@ -73,7 +74,6 @@ var fixedSrc = argv._[0] || 'src',
     fixedDest = argv._[1] || 'build';
 
 var defaultConfig = {
-  cwd: cwd,
   src: path.join(cwd, fixedSrc),
   dest: path.join(cwd, fixedDest, 'dist'),
   cache: path.join(cwd, fixedDest, 'index.json'),
@@ -95,9 +95,11 @@ var defaultConfig = {
   }
 };
 
-if ($.isFile(pkg)) {
-  $.merge(defaultConfig, $.readJSON(pkg).tarima || {});
-}
+[pkg, bower].forEach((file) => {
+  if ($.isFile(file)) {
+    $.merge(defaultConfig, $.readJSON(file).tarima || {});
+  }
+})
 
 if ($.isFile(argv.config)) {
   $.merge(defaultConfig, $.readJSON(argv.config) || {});
