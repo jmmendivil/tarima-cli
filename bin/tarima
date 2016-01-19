@@ -87,12 +87,7 @@ var defaultConfig = {
   port: argv.port,
   proxy: argv.proxy,
   browser: argv.browser,
-  locals: {},
-  rename: [],
-  modules: [],
   filtered: [],
-  extensions: {},
-  serverOptions: {},
   compileOptions: {
     globals: {}
   }
