@@ -88,7 +88,7 @@ var defaultConfig = {
   proxy: argv.proxy,
   browser: argv.browser,
   locals: {},
-  rename: {},
+  rename: [],
   modules: [],
   filtered: [],
   extensions: {},
