@@ -15,7 +15,7 @@ var cwd = process.cwd(),
 
 var argv = minimist(process.argv.slice(2), {
   boolean: ['force', 'watch', 'bundle', 'verbose', 'server', 'open'],
-  string: ['only', 'exclude', 'require', 'port', 'proxy', 'browser', 'globals', 'config'],
+  string: ['ext', 'only', 'exclude', 'require', 'port', 'proxy', 'browser', 'globals', 'config'],
   alias: {
     c: 'config',
     v: 'version',
@@ -26,6 +26,7 @@ var argv = minimist(process.argv.slice(2), {
     f: 'force',
     w: 'watch',
     i: 'only',
+    e: 'ext',
     s: 'server',
     o: 'open',
     p: 'port',
@@ -50,6 +51,8 @@ OPTIONS:
                     - x.y      -> !**\/x.y
                     - foo      -> !**\/foo/**
                     - foo/bar  -> !**\/foo\/bar/**
+  -e, --ext       Configure automatic extensions (e.g. -e coffee:js -e jade:hbs:html)
+                  This means ".coffee to .js" and ".jade and .hbs to .html" respectively
   -i, --only      Filter out non-matching sources using String.prototype.indexOf()
   -f, --force     Compile all sources always
   -w, --watch     Enable file watching for all sources
@@ -88,6 +91,7 @@ var defaultConfig = {
   proxy: argv.proxy,
   browser: argv.browser,
   filtered: [],
+  extensions:{},
   compileOptions: {
     globals: {}
   }
@@ -105,6 +109,19 @@ if ($.isFile(argv.config)) {
 
 function fixedArray(obj) {
   return !Array.isArray(obj) ? obj.split(',') : obj;
+}
+
+if (argv.ext) {
+  fixedArray(argv.ext).forEach(function(ext) {
+    fixedArray(ext).forEach(function(map) {
+      var parts = map.split(':'),
+          to = parts.pop();
+
+      parts.forEach(function(key) {
+        defaultConfig.extensions[key] = to;
+      });
+    });
+  });
 }
 
 if (argv.only) {
