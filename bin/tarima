@@ -177,7 +177,7 @@ run(defaultConfig, function(err, result) {
 
   // TODO: improve error handling
   if (err) {
-    errLog(argv.verbose && err.stack || err);
+    errLog(err.message || err.toString());
 
     if (!argv.watch) {
       if (child) {
@@ -188,12 +188,12 @@ run(defaultConfig, function(err, result) {
     }
   }
 
-  var suffix = argv.watch ? $.style('\n> {green|waiting for changes...}') : '';
+  var suffix = argv.watch ? $.style('\n{blackBright|# Waiting for changes...}') : '';
 
   if (!result.files.length) {
-    infoLog($.style('{blackBright|Without changes (%s)}', $.timeDiff(result.start)) + suffix);
+    infoLog($.style('{blackBright|# Without changes (%s)}', $.timeDiff(result.start)) + suffix);
   } else {
-    infoLog($.style('{cyan|%s file(s) synced in %s}', result.files.length, $.timeDiff(result.start)) + suffix);
+    infoLog($.style('{cyan|# %s file%s synced in %s}', result.files.length, result.files.length !== 1 ? 's' : '', $.timeDiff(result.start)) + suffix);
   }
 
   if (cmd.length && result.files.length && !err) {
