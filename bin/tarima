@@ -158,6 +158,9 @@ if (argv.globals) {
   });
 }
 
+defaultConfig.compileOptions.compileDebug = argv.debug;
+defaultConfig.compileOptions.verboseDebug = argv.verbose;
+
 var cmd = argv['--'],
     child;
 
