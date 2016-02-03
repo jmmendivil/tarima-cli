@@ -1,4 +1,5 @@
 cmd = require('./helpers/cmd')
+read = require('./helpers/read')
 
 describe 'CLI', ->
   describe 'running without arguments', ->
@@ -26,3 +27,10 @@ describe 'CLI', ->
 
     it 'should display the package version', ->
       expect(cmd.stdout).toContain require('../package.json').version
+
+  describe 'using custom [SRC]', ->
+    beforeEach (done) ->
+      cmd 'example', done
+
+    it 'should copy unsupported sources', ->
+      expect(read('build/dist/blank.txt')).toEqual "TEXT\n"
