@@ -1,6 +1,3 @@
-cmd = require('./helpers/cmd')
-read = require('./helpers/read')
-
 describe 'CLI', ->
   describe 'running without arguments', ->
     beforeEach cmd
