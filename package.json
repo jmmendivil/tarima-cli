@@ -5,6 +5,10 @@
   "bin": {
     "tarima": "bin/tarima"
   },
+  "scripts": {
+    "spec": "jasmine-node --color --coffee --verbose --captureExceptions spec",
+    "watch": "jasmine-node --color --coffee --verbose --captureExceptions spec --autotest --watch bin lib"
+  },
   "dependencies": {
     "async-parts": "^0.2.2",
     "browser-sync": "^2.11.1",
@@ -12,6 +16,7 @@
     "chokidar": "^1.4.2",
     "cli-color": "^1.1.0",
     "fs-extra": "^0.26.4",
+    "jasmine-node": "^1.14.5",
     "micromatch": "^2.3.7",
     "minimist": "^1.2.0",
     "pretty-ms": "^2.1.0",
