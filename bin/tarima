@@ -242,21 +242,21 @@ run(defaultConfig, function(err, result) {
     child.on('close', function(exitCode) {
       infoLog($.style('{%s|# %s} done in %s', exitCode || errors.length ? 'red' : 'cyan', cmd[0], $.timeDiff(start)));
 
-      icon = 'icon.png';
-      message = 'Task done in ' + $.timeDiff(start);
+      var icon = 'icon.png',
+          message = 'Task done in ' + $.timeDiff(start);
 
       if (exitCode || errors.length) {
-        icon = 'error-' + icon
-        message = 'Error'
+        icon = 'error-' + icon;
+        message = 'Error';
       }
 
-      noticeObj = {
+      var noticeObj = {
         'title': cmd[0] + ' done',
         'message': message
-      }
+      };
 
-      if ($.exists(path.join(cwd, 'tarima/', icon))) {
-        noticeObj.icon = path.join(cwd, 'tarima/', icon)
+      if ($.exists(path.join(cwd, 'tarima', icon))) {
+        noticeObj.icon = path.join(cwd, 'tarima', icon);
       }
 
       notifier.notify(noticeObj);
