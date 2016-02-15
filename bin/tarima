@@ -24,6 +24,7 @@ var argv = minimist(process.argv.slice(2), {
     r: 'require',
     x: 'exclude',
     b: 'bundle',
+    d: 'debug',
     f: 'force',
     w: 'watch',
     i: 'only',
@@ -55,6 +56,7 @@ OPTIONS:
   -e, --ext       Configure automatic extensions (e.g. -e coffee:js -e jade:hbs:html)
                   This means ".coffee to .js" and ".jade and .hbs to .html" respectively
   -i, --only      Filter out non-matching sources using String.prototype.indexOf()
+  -f, --debug     Enable compileDebug flag for some engines
   -f, --force     Compile all sources always
   -w, --watch     Enable file watching for all sources
   -b, --bundle    Enable script bundling via Browserify (styles, views, etc.)
@@ -112,6 +114,23 @@ function fixedArray(obj) {
   return !Array.isArray(obj) ? obj.split(',') : obj;
 }
 
+function fixedValue(string) {
+  if (/^-?\d+(\.\d+)?$/.test(string)) {
+    return parseFloat(string);
+  }
+
+  var values = {
+    true: true,
+    false: false
+  };
+
+  if (typeof values[string] !== 'undefined') {
+    return values[string];
+  }
+
+  return string || null;
+}
+
 if (argv.ext) {
   fixedArray(argv.ext).forEach(function(ext) {
     fixedArray(ext).forEach(function(map) {
@@ -155,7 +174,7 @@ if (argv.globals) {
   fixedArray(argv.globals).forEach(function(value) {
     var parts = value.split('=');
 
-    defaultConfig.compileOptions.globals[parts[0]] = parts[1];
+    defaultConfig.compileOptions.globals[parts[0]] = fixedValue(parts[1]);
   });
 }
 
@@ -174,27 +193,27 @@ function infoLog(message) {
 }
 
 run(defaultConfig, function(err, result) {
-  var onError = this.emit.bind(null, 'error');
-
-  // TODO: improve error handling
   if (err) {
     errLog(err.message || err.toString());
-
-    if (!argv.watch) {
-      if (child) {
-        child.kill();
-      }
-
-      die(1);
-    }
   }
 
-  var suffix = argv.watch ? $.style('\n{blackBright|# Waiting for changes...}') : '';
+  var onError = this.emit.bind(null, 'error');
+
+  var suffix = argv.watch ? $.style('\n{blackBright|# Waiting for changes...}') : '',
+      status = (err || (err = result.exceptions && result.exceptions.length)) ? 'yellow' : 'cyan';
 
   if (!result.files.length) {
     infoLog($.style('{blackBright|# Without changes (%s)}', $.timeDiff(result.start)) + suffix);
   } else {
-    infoLog($.style('{cyan|# %s file%s synced in %s}', result.files.length, result.files.length !== 1 ? 's' : '', $.timeDiff(result.start)) + suffix);
+    infoLog($.style('{%s|# %s file%s synced in %s}', status, result.files.length, result.files.length !== 1 ? 's' : '', $.timeDiff(result.start)) + suffix);
+  }
+
+  if (!argv.watch && err) {
+    if (child) {
+      child.kill();
+    }
+
+    die(1);
   }
 
   if (cmd.length && result.files.length && !err) {
@@ -204,7 +223,7 @@ run(defaultConfig, function(err, result) {
 
     var start = new Date();
 
-    infoLog($.style('> {cyan|%s} %s', cmd[0], cmd.slice(1).join(' ')));
+    infoLog($.style('{cyan|# %s} %s', cmd[0], cmd.slice(1).join(' ')));
 
     child = spawn(cmd[0], cmd.slice(1));
 
@@ -221,7 +240,7 @@ run(defaultConfig, function(err, result) {
     });
 
     child.on('close', function(exitCode) {
-      infoLog($.style('> {%s|%s} done in %s', exitCode || errors.length ? 'red' : 'cyan', cmd[0], $.timeDiff(start)));
+      infoLog($.style('{%s|# %s} done in %s', exitCode || errors.length ? 'red' : 'cyan', cmd[0], $.timeDiff(start)));
 
       icon = 'icon.png';
       message = 'Task done in ' + $.timeDiff(start);
