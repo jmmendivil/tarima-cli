@@ -14,7 +14,7 @@ var cwd = process.cwd(),
     thisPkg = require(path.join(__dirname, '../package.json'));
 
 var argv = minimist(process.argv.slice(2), {
-  boolean: ['force', 'watch', 'bundle', 'verbose', 'server', 'open'],
+  boolean: ['debug', 'force', 'watch', 'bundle', 'verbose', 'server', 'open'],
   string: ['ext', 'only', 'exclude', 'require', 'port', 'proxy', 'browser', 'globals', 'config'],
   alias: {
     c: 'config',
