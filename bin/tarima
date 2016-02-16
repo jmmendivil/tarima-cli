@@ -79,6 +79,7 @@ var fixedSrc = argv._[0] || 'src',
     fixedDest = argv._[1] || 'build';
 
 var defaultConfig = {
+  cwd: cwd,
   src: path.join(cwd, fixedSrc),
   dest: path.join(cwd, fixedDest, 'dist'),
   cache: path.join(cwd, fixedDest, 'index.json'),
