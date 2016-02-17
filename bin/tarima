@@ -4,6 +4,7 @@ var run = require('../lib'),
     path = require('path'),
     minimist = require('minimist'),
     spawn = require('child_process').spawn;
+    notifier =  require('node-notifier');
 
 var $ = require('../lib/utils');
 
@@ -246,6 +247,25 @@ run(defaultConfig, function(err, result) {
 
     child.on('close', function(exitCode) {
       infoLog($.style('{%s|# %s} done in %s', exitCode || errors.length ? 'red' : 'magenta', cmd[0], $.timeDiff(start)));
+
+      var icon = 'icon.png',
+          message = 'Task done in ' + $.timeDiff(start);
+
+      if (exitCode || errors.length) {
+        icon = 'error-' + icon;
+        message = 'Error';
+      }
+
+      var noticeObj = {
+        'title': cmd[0] + ' done',
+        'message': message
+      };
+
+      if ($.exists(path.join(cwd, 'tarima', icon))) {
+        noticeObj.icon = path.join(cwd, 'tarima', icon);
+      }
+
+      notifier.notify(noticeObj);
 
       if (errors.length) {
         errLog('\n' + errors.join('\n'));
