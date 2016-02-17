@@ -3,7 +3,7 @@
 var run = require('../lib'),
     path = require('path'),
     minimist = require('minimist'),
-    spawn = require('child_process').spawn;
+    spawn = require('child_process').spawn,
     notifier =  require('node-notifier');
 
 var $ = require('../lib/utils');
@@ -193,13 +193,7 @@ function infoLog(message) {
   process.stdout.write(message + '\n');
 }
 
-run(defaultConfig, function(err, result) {
-  if (err) {
-    errLog(err.message || err.toString());
-  }
-
-  var onError = this.emit.bind(null, 'error');
-
+function infoFiles(err, result) {
   var suffix = argv.watch ? $.style('\n{blackBright|# Waiting for changes...}') : '',
       status = (err || (err = result.err && result.err.length)) ? 'yellow' : 'magenta';
 
@@ -213,6 +207,77 @@ run(defaultConfig, function(err, result) {
       result.ok.length !== 1 ? 's' : '',
       $.timeDiff(result.start)) + suffix);
   }
+}
+
+function exec(cmd) {
+  var onError = this.emit.bind(null, 'error');
+
+  if (child) {
+    child.kill();
+  }
+
+  var start = new Date();
+
+  infoLog($.style('{magenta|# %s} %s', cmd[0], cmd.slice(1).join(' ')));
+
+  child = spawn(cmd[0], cmd.slice(1));
+
+  child.stdout.pipe(process.stdout);
+
+  var errors = [];
+
+  child.stderr.on('data', function(data) {
+    var line = data.toString().trim();
+
+    if (line) {
+      errors.push(line);
+    }
+  });
+
+  child.on('close', function(exitCode) {
+    infoLog($.style('{%s|# %s} done in %s', exitCode || errors.length ? 'red' : 'magenta', cmd[0], $.timeDiff(start)));
+
+    var icon = 'icon.png',
+        message = 'Task done in ' + $.timeDiff(start);
+
+    if (exitCode || errors.length) {
+      icon = 'error-' + icon;
+      message = 'Error';
+    }
+
+    var noticeObj = {
+      'title': cmd[0] + ' done',
+      'message': message
+    };
+
+    if ($.exists(path.join(cwd, 'tarima', icon))) {
+      noticeObj.icon = path.join(cwd, 'tarima', icon);
+    }
+
+    notifier.notify(noticeObj);
+
+    if (errors.length) {
+      errLog('\n' + errors.join('\n'));
+      onError(errors.join('\n'));
+
+      // TODO: halt on this?
+      // exitCode = exitCode || !!(errLog.length);
+    }
+
+    if (exitCode && !argv.watch) {
+      die(exitCode);
+    }
+  });
+}
+
+run(defaultConfig, function(err, result) {
+  if (err) {
+    errLog(err.message || err.toString());
+  }
+
+  if (result) {
+    infoFiles(err, result);
+  }
 
   if (!argv.watch && err) {
     if (child) {
@@ -222,62 +287,7 @@ run(defaultConfig, function(err, result) {
     die(1);
   }
 
-  if (cmd.length && result.files.length && !err) {
-    if (child) {
-      child.kill();
-    }
-
-    var start = new Date();
-
-    infoLog($.style('{magenta|# %s} %s', cmd[0], cmd.slice(1).join(' ')));
-
-    child = spawn(cmd[0], cmd.slice(1));
-
-    child.stdout.pipe(process.stdout);
-
-    var errors = [];
-
-    child.stderr.on('data', function(data) {
-      var line = data.toString().trim();
-
-      if (line) {
-        errors.push(line);
-      }
-    });
-
-    child.on('close', function(exitCode) {
-      infoLog($.style('{%s|# %s} done in %s', exitCode || errors.length ? 'red' : 'magenta', cmd[0], $.timeDiff(start)));
-
-      var icon = 'icon.png',
-          message = 'Task done in ' + $.timeDiff(start);
-
-      if (exitCode || errors.length) {
-        icon = 'error-' + icon;
-        message = 'Error';
-      }
-
-      var noticeObj = {
-        'title': cmd[0] + ' done',
-        'message': message
-      };
-
-      if ($.exists(path.join(cwd, 'tarima', icon))) {
-        noticeObj.icon = path.join(cwd, 'tarima', icon);
-      }
-
-      notifier.notify(noticeObj);
-
-      if (errors.length) {
-        errLog('\n' + errors.join('\n'));
-        onError(errors.join('\n'));
-
-        // TODO: halt on this?
-        // exitCode = exitCode || !!(errLog.length);
-      }
-
-      if (exitCode && !argv.watch) {
-        die(exitCode);
-      }
-    });
+  if (cmd.length && !err) {
+    exec();
   }
 });
