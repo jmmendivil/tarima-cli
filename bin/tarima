@@ -100,11 +100,11 @@ var defaultConfig = {
   }
 };
 
-[pkg, bower].forEach((file) => {
+[pkg, bower].forEach(function (file) {
   if ($.isFile(file)) {
     $.merge(defaultConfig, $.readJSON(file).tarima || {});
   }
-})
+});
 
 if ($.isFile(argv.config)) {
   $.merge(defaultConfig, $.readJSON(argv.config) || {});
