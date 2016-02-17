@@ -209,9 +209,20 @@ function infoFiles(err, result) {
   }
 }
 
-function exec(cmd) {
-  var onError = this.emit.bind(null, 'error');
+function notify(message, title, icon) {
+  var noticeObj = {
+    title: title || thisPkg.name,
+    message: message
+  };
 
+  if ($.exists(icon)) {
+    noticeObj.icon = path.resolve(icon);
+  }
+
+  notifier.notify(noticeObj);
+}
+
+function exec(onError) {
   if (child) {
     child.kill();
   }
@@ -237,24 +248,15 @@ function exec(cmd) {
   child.on('close', function(exitCode) {
     infoLog($.style('{%s|# %s} done in %s', exitCode || errors.length ? 'red' : 'magenta', cmd[0], $.timeDiff(start)));
 
-    var icon = 'icon.png',
-        message = 'Task done in ' + $.timeDiff(start);
+    var message = 'Task done in ' + $.timeDiff(start),
+        icon = 'icon.png';
 
     if (exitCode || errors.length) {
       icon = 'error-' + icon;
       message = 'Error';
     }
 
-    var noticeObj = {
-      'title': cmd[0] + ' done',
-      'message': message
-    };
-
-    if ($.exists(path.join(cwd, 'tarima', icon))) {
-      noticeObj.icon = path.join(cwd, 'tarima', icon);
-    }
-
-    notifier.notify(noticeObj);
+    notify(message, cmd[0] + ' done', icon);
 
     if (errors.length) {
       errLog('\n' + errors.join('\n'));
@@ -288,6 +290,6 @@ run(defaultConfig, function(err, result) {
   }
 
   if (cmd.length && !err) {
-    exec();
+    exec(this.emit.bind(null, 'error'));
   }
 });
