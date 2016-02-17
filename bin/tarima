@@ -200,12 +200,17 @@ run(defaultConfig, function(err, result) {
   var onError = this.emit.bind(null, 'error');
 
   var suffix = argv.watch ? $.style('\n{blackBright|# Waiting for changes...}') : '',
-      status = (err || (err = result.exceptions && result.exceptions.length)) ? 'yellow' : 'cyan';
+      status = (err || (err = result.err && result.err.length)) ? 'yellow' : 'cyan';
 
   if (!result.files.length) {
     infoLog($.style('{blackBright|# Without changes (%s)}', $.timeDiff(result.start)) + suffix);
   } else {
-    infoLog($.style('{%s|# %s file%s synced in %s}', status, result.files.length, result.files.length !== 1 ? 's' : '', $.timeDiff(result.start)) + suffix);
+    infoLog($.style('{%s|# %s of %s file%s updated in %s}',
+      status,
+      result.ok.length,
+      result.files.length,
+      result.ok.length !== 1 ? 's' : '',
+      $.timeDiff(result.start)) + suffix);
   }
 
   if (!argv.watch && err) {
