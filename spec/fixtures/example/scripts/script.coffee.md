@@ -1,3 +1,3 @@
 # It works!
 
-    foo 'bar'
+    foo bar
