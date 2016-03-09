@@ -35,8 +35,8 @@ var die = process.exit.bind(process);
 var thisPkg = require(path.join(__dirname, '../package.json'));
 
 if (argv.help) {
-  $.print('USAGE:\n  ' + Object.keys(thisPkg.bin)[0] + ' [SRC] [DEST] [OPTIONS]\n');
-  $.print(function() {/*---
+  $.log.writeln('USAGE:\n  ' + Object.keys(thisPkg.bin)[0] + ' [SRC] [DEST] [OPTIONS]');
+  $.log.writeln(function() {/*---
 OPTIONS:
   -c, --config    Use configuration file
   -V, --verbose   Increase log information
@@ -62,12 +62,12 @@ OPTIONS:
   -P, --proxy     Enable proxying instead --server (e.g. -P localhost:8080)
   -B, --browser   Set a custom browser when --open is specified
   -G, --globals   Set custom values to inject on compiled scripts (e.g. -G FOO=BAR)
----*/}.toString().match(/---([\s\S]+)---/)[1].replace(/\\/g, '') + '\n');
+---*/}.toString().match(/---([\s\S]+)---/)[1].replace(/\\/g, ''));
   die(1);
 }
 
 if (argv.version) {
-  $.print($.color.cyan('⚡ ' + thisPkg.name + ' v' + thisPkg.version) + '\n');
+  $.log.legend(thisPkg.name + ' v' + thisPkg.version + '\n');
   die(1);
 }
 
@@ -90,7 +90,6 @@ var defaultConfig = {
   force: argv.force,
   watch: argv.watch,
   bundle: argv.bundle,
-  verbose: argv.verbose,
   require: argv.require,
   server: argv.server,
   open: argv.open,
@@ -185,6 +184,8 @@ if (argv.globals) {
 defaultConfig.compileOptions.compileDebug = argv.debug;
 defaultConfig.compileOptions.verboseDebug = argv.verbose;
 
+$.log.setLevel(argv.verbose ? 'verbose' : argv.debug ? 'debug' : 'info');
+
 var cmd = argv['--'],
     child;
 
@@ -192,23 +193,21 @@ function errLog(message) {
   process.stderr.write($.color.red(message) + '\n');
 }
 
-function infoLog(message) {
-  process.stdout.write(message + '\n');
-}
-
 function infoFiles(err, result) {
-  var suffix = argv.watch ? $.style('\n{blackBright|# Waiting for changes...}') : '',
-      status = (err || (err = result.err && result.err.length)) ? 'yellow' : 'magenta';
-
-  if (!result.files.length) {
-    infoLog($.style('{blackBright|# Without changes (%s)}', $.timeDiff(result.start)) + suffix);
+  if (argv.watch) {
+    $.log.info('Waiting for changes...');
   } else {
-    infoLog($.style('{%s|# %s of %s file%s updated in %s}',
-      status,
-      result.ok.length,
-      result.files.length,
-      result.ok.length !== 1 ? 's' : '',
-      $.timeDiff(result.start)) + suffix);
+    if (!result.files.length) {
+      $.log.info('Without changes (%s)', $.timeDiff(result.start));
+    } else {
+      var status = (err || (err = result.err && result.err.length)) ? 'yellow' : 'blue';
+
+      $.log.writeln($.color[status]('# %s of %s file%s in %s'),
+        result.ok.length,
+        result.files.length,
+        result.ok.length !== 1 ? 's' : '',
+        $.timeDiff(result.start));
+    }
   }
 }
 
@@ -232,7 +231,7 @@ function exec(onError) {
 
   var start = new Date();
 
-  infoLog($.style('{magenta|# %s} %s', cmd[0], cmd.slice(1).join(' ')));
+  $.log.writeln($.color.cyan(cmd[0]) + ' ' + cmd.slice(1).join(' '));
 
   child = spawn(cmd[0], cmd.slice(1));
 
@@ -249,7 +248,7 @@ function exec(onError) {
   });
 
   child.on('close', function(exitCode) {
-    infoLog($.style('{%s|# %s} done in %s', exitCode || errors.length ? 'red' : 'magenta', cmd[0], $.timeDiff(start)));
+    $.log.writeln($.color[exitCode || errors.length  ? 'red' : 'cyan'](cmd[0]) + ' done in ' + $.timeDiff(start));
 
     var message = 'Task done in ' + $.timeDiff(start),
         icon = 'icon.png';
@@ -274,6 +273,11 @@ function exec(onError) {
     }
   });
 }
+
+// TODO: this phrase should be random and funny
+var phrase = 'Loading all the given stuff...';
+
+$.log.info(thisPkg.name + ' v' + thisPkg.version + ' - ' + phrase + '\n');
 
 run(defaultConfig, function(err, result) {
   if (err) {
