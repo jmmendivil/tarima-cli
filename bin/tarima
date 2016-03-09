@@ -5,20 +5,9 @@ var path = require('path'),
 
 var thisPkg = require(path.join(__dirname, '../package.json'));
 
-process.stdout.write(clc.cyan('⚡ ' + thisPkg.name + ' v' + thisPkg.version) + '\n');
-process.stdout.write(clc.blackBright('# Initializing...'));
+process.stdout.write(clc.blackBright('⚡ ' + thisPkg.name + ' v' + thisPkg.version));
 
-var run = require('../lib'),
-    minimist = require('minimist'),
-    spawn = require('child_process').spawn,
-    notifier =  require('node-notifier');
-
-var $ = require('../lib/utils');
-
-var cwd = process.cwd(),
-    die = process.exit.bind(process),
-    pkg = path.join(cwd, 'package.json'),
-    bower = path.join(cwd, 'bower.json');
+var minimist = require('minimist');
 
 var argv = minimist(process.argv.slice(2), {
   boolean: ['debug', 'force', 'watch', 'bundle', 'verbose', 'server', 'open'],
@@ -45,9 +34,13 @@ var argv = minimist(process.argv.slice(2), {
   '--': true
 });
 
+var $ = require('../lib/utils');
+
 // clear
 process.stdout.write(clc.erase.line);
-process.stdout.write(clc.move.left(18));
+process.stdout.write(clc.move.left(20));
+
+var die = process.exit.bind(process);
 
 if (argv.help) {
   $.print('USAGE:\n  ' + Object.keys(thisPkg.bin)[0] + ' [SRC] [DEST] [OPTIONS]\n');
@@ -82,9 +75,17 @@ OPTIONS:
 }
 
 if (argv.version) {
-  $.print(thisPkg.name + ' v' + thisPkg.version + '\n');
+  $.print($.color.cyan('⚡ ' + thisPkg.name + ' v' + thisPkg.version) + '\n');
   die(1);
 }
+
+var run = require('../lib'),
+    spawn = require('child_process').spawn,
+    notifier =  require('node-notifier');
+
+var cwd = process.cwd(),
+    pkg = path.join(cwd, 'package.json'),
+    bower = path.join(cwd, 'bower.json');
 
 var fixedSrc = argv._[0] || 'src',
     fixedDest = argv._[1] || 'build';
