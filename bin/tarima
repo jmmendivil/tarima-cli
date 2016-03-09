@@ -1,13 +1,7 @@
 #!/usr/bin/env node
 
 var path = require('path'),
-    clc = require('cli-color');
-
-var thisPkg = require(path.join(__dirname, '../package.json'));
-
-process.stdout.write(clc.blackBright('⚡ ' + thisPkg.name + ' v' + thisPkg.version));
-
-var minimist = require('minimist');
+    minimist = require('minimist');
 
 var argv = minimist(process.argv.slice(2), {
   boolean: ['debug', 'force', 'watch', 'bundle', 'verbose', 'server', 'open'],
@@ -36,11 +30,9 @@ var argv = minimist(process.argv.slice(2), {
 
 var $ = require('../lib/utils');
 
-// clear
-process.stdout.write(clc.erase.line);
-process.stdout.write(clc.move.left(20));
-
 var die = process.exit.bind(process);
+
+var thisPkg = require(path.join(__dirname, '../package.json'));
 
 if (argv.help) {
   $.print('USAGE:\n  ' + Object.keys(thisPkg.bin)[0] + ' [SRC] [DEST] [OPTIONS]\n');
