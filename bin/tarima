@@ -71,6 +71,11 @@ if (argv.version) {
   die(1);
 }
 
+// TODO: this phrase should be random and funny
+var phrase = 'Loading all the given stuff...';
+
+$.log.legend(thisPkg.name + ' v' + thisPkg.version + ' - ' + phrase + '\n');
+
 var run = require('../lib'),
     spawn = require('child_process').spawn,
     notifier =  require('node-notifier');
@@ -198,9 +203,10 @@ function infoFiles(err, result) {
     $.log.info('Waiting for changes...');
   } else {
     if (!result.files.length) {
-      $.log.info('Without changes (%s)', $.timeDiff(result.start));
+      $.log.info('Without changes (%s)\n', $.timeDiff(result.start));
     } else {
       var status = (err || (err = result.err && result.err.length)) ? 'yellow' : 'blue';
+
 
       $.log.writeln($.color[status]('# %s of %s file%s in %s'),
         result.ok.length,
@@ -273,11 +279,6 @@ function exec(onError) {
     }
   });
 }
-
-// TODO: this phrase should be random and funny
-var phrase = 'Loading all the given stuff...';
-
-$.log.info(thisPkg.name + ' v' + thisPkg.version + ' - ' + phrase + '\n');
 
 run(defaultConfig, function(err, result) {
   if (err) {
