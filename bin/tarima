@@ -1,7 +1,14 @@
 #!/usr/bin/env node
 
+var path = require('path'),
+    clc = require('cli-color');
+
+var thisPkg = require(path.join(__dirname, '../package.json'));
+
+process.stdout.write(clc.cyan('⚡ ' + thisPkg.name + ' v' + thisPkg.version) + '\n');
+process.stdout.write(clc.blackBright('# Initializing...'));
+
 var run = require('../lib'),
-    path = require('path'),
     minimist = require('minimist'),
     spawn = require('child_process').spawn,
     notifier =  require('node-notifier');
@@ -11,8 +18,7 @@ var $ = require('../lib/utils');
 var cwd = process.cwd(),
     die = process.exit.bind(process),
     pkg = path.join(cwd, 'package.json'),
-    bower = path.join(cwd, 'bower.json'),
-    thisPkg = require(path.join(__dirname, '../package.json'));
+    bower = path.join(cwd, 'bower.json');
 
 var argv = minimist(process.argv.slice(2), {
   boolean: ['debug', 'force', 'watch', 'bundle', 'verbose', 'server', 'open'],
@@ -38,6 +44,10 @@ var argv = minimist(process.argv.slice(2), {
   },
   '--': true
 });
+
+// clear
+process.stdout.write(clc.erase.line);
+process.stdout.write(clc.move.left(18));
 
 if (argv.help) {
   $.print('USAGE:\n  ' + Object.keys(thisPkg.bin)[0] + ' [SRC] [DEST] [OPTIONS]\n');
