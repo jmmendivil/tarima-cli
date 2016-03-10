@@ -205,7 +205,7 @@ function infoFiles(err, result) {
     if (!result.files.length) {
       logger.INFO('Without changes (%s)\n', $.timeDiff(result.start));
     } else {
-      logger[(err || (result.err && result.err.length)) ? 'WARN' : 'INFO']('%s of %s file%s in %s\n',
+      logger[(err || (result.err && result.err.length)) ? 'WARN' : 'HINT']('%s of %s file%s in %s\n',
         result.ok.length,
         result.files.length,
         result.ok.length !== 1 ? 's' : '',
