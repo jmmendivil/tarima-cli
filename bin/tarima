@@ -4,9 +4,10 @@ var path = require('path'),
     minimist = require('minimist');
 
 var argv = minimist(process.argv.slice(2), {
-  boolean: ['debug', 'force', 'watch', 'bundle', 'verbose', 'server', 'open'],
+  boolean: ['quiet', 'debug', 'force', 'watch', 'bundle', 'verbose', 'server', 'open'],
   string: ['ext', 'only', 'exclude', 'require', 'port', 'proxy', 'browser', 'globals', 'config'],
   alias: {
+    q: 'quiet',
     c: 'config',
     v: 'version',
     V: 'verbose',
@@ -38,6 +39,7 @@ if (argv.help) {
   $.log.writeln('USAGE:\n  ' + Object.keys(thisPkg.bin)[0] + ' [SRC] [DEST] [OPTIONS]');
   $.log.writeln(function() {/*---
 OPTIONS:
+  -q, --quiet     Disable all logging
   -c, --config    Use configuration file
   -V, --verbose   Increase log information
   -r, --require   Load scripts at startup (e.g. -r some-module -r ./lib/hooks.js)
@@ -71,10 +73,12 @@ if (argv.version) {
   die(1);
 }
 
-// TODO: this phrase should be random and funny
-var phrase = 'Loading all the given stuff...';
+if (argv.quiet !== true) {
+  $.log.setLevel(argv.verbose ? 'verbose' : argv.debug ? 'debug' : 'info');
+}
 
-$.log.legend(thisPkg.name + ' v' + thisPkg.version + ' - ' + phrase + '\n');
+// TODO: this phrase should be random and funny?
+$.log.legend(thisPkg.name + ' v' + thisPkg.version + ' - Loading stuff...\n');
 
 var run = require('../lib'),
     spawn = require('child_process').spawn,
@@ -189,8 +193,6 @@ if (argv.globals) {
 defaultConfig.compileOptions.compileDebug = argv.debug;
 defaultConfig.compileOptions.verboseDebug = argv.verbose;
 
-$.log.setLevel(argv.verbose ? 'verbose' : argv.debug ? 'debug' : 'info');
-
 var cmd = argv['--'],
     child;
 
@@ -205,10 +207,7 @@ function infoFiles(err, result) {
     if (!result.files.length) {
       $.log.info('Without changes (%s)\n', $.timeDiff(result.start));
     } else {
-      var status = (err || (err = result.err && result.err.length)) ? 'yellow' : 'blue';
-
-
-      $.log.writeln($.color[status]('# %s of %s file%s in %s'),
+      $.log[(err || (result.err && result.err.length)) ? 'warn' : 'info']('%s of %s file%s in %s\n',
         result.ok.length,
         result.files.length,
         result.ok.length !== 1 ? 's' : '',
