@@ -29,15 +29,18 @@ var argv = minimist(process.argv.slice(2), {
   '--': true
 });
 
+// common helpers
 var $ = require('../lib/utils');
+
+var logger = require('../lib/logger');
 
 var die = process.exit.bind(process);
 
 var thisPkg = require(path.join(__dirname, '../package.json'));
 
 if (argv.help) {
-  $.log.writeln('USAGE:\n  ' + Object.keys(thisPkg.bin)[0] + ' [SRC] [DEST] [OPTIONS]');
-  $.log.writeln(function() {/*---
+  logger.writeln('USAGE:\n  ' + Object.keys(thisPkg.bin)[0] + ' [SRC] [DEST] [OPTIONS]');
+  logger.writeln(function() {/*---
 OPTIONS:
   -q, --quiet     Disable all logging
   -c, --config    Use configuration file
@@ -69,16 +72,14 @@ OPTIONS:
 }
 
 if (argv.version) {
-  $.log.legend(thisPkg.name + ' v' + thisPkg.version + '\n');
+  logger.writeln($.color.cyan('⚡ ' + thisPkg.name + ' v' + thisPkg.version));
   die(1);
 }
 
 if (argv.quiet !== true) {
-  $.log.setLevel(argv.verbose ? 'verbose' : argv.debug ? 'debug' : 'info');
+  logger.writeln($.color.blackBright('⚡ ' + thisPkg.name + ' v' + thisPkg.version + ' - Loading stuff...'));
+  logger.setLevel(argv.verbose ? 'verbose' : argv.debug ? 'debug' : 'info');
 }
-
-// TODO: this phrase should be random and funny?
-$.log.legend(thisPkg.name + ' v' + thisPkg.version + ' - Loading stuff...\n');
 
 var run = require('../lib'),
     spawn = require('child_process').spawn,
@@ -202,12 +203,12 @@ function errLog(message) {
 
 function infoFiles(err, result) {
   if (argv.watch) {
-    $.log.info('Waiting for changes...');
+    logger.INFO('Waiting for changes...');
   } else {
     if (!result.files.length) {
-      $.log.info('Without changes (%s)\n', $.timeDiff(result.start));
+      logger.INFO('Without changes (%s)\n', $.timeDiff(result.start));
     } else {
-      $.log[(err || (result.err && result.err.length)) ? 'warn' : 'info']('%s of %s file%s in %s\n',
+      logger[(err || (result.err && result.err.length)) ? 'WARN' : 'INFO']('%s of %s file%s in %s\n',
         result.ok.length,
         result.files.length,
         result.ok.length !== 1 ? 's' : '',
@@ -236,7 +237,7 @@ function exec(onError) {
 
   var start = new Date();
 
-  $.log.writeln($.color.cyan(cmd[0]) + ' ' + cmd.slice(1).join(' '));
+  logger.writeln($.color.cyan(cmd[0]) + ' ' + cmd.slice(1).join(' '));
 
   child = spawn(cmd[0], cmd.slice(1));
 
@@ -253,7 +254,7 @@ function exec(onError) {
   });
 
   child.on('close', function(exitCode) {
-    $.log.writeln($.color[exitCode || errors.length  ? 'red' : 'cyan'](cmd[0]) + ' done in ' + $.timeDiff(start));
+    logger.writeln($.color[exitCode || errors.length  ? 'red' : 'cyan'](cmd[0]) + ' done in ' + $.timeDiff(start));
 
     var message = 'Task done in ' + $.timeDiff(start),
         icon = 'icon.png';
@@ -268,9 +269,6 @@ function exec(onError) {
     if (errors.length) {
       errLog('\n' + errors.join('\n'));
       onError(errors.join('\n'));
-
-      // TODO: halt on this?
-      // exitCode = exitCode || !!(errLog.length);
     }
 
     if (exitCode && !argv.watch) {
