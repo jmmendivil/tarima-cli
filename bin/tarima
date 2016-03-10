@@ -72,7 +72,7 @@ OPTIONS:
 }
 
 if (argv.version) {
-  logger.writeln($.color.cyan('⚡ ' + thisPkg.name + ' v' + thisPkg.version));
+  logger.printf('{cyan|⚡ %s v%s}\n', thisPkg.name, thisPkg.version);
   die(1);
 }
 
