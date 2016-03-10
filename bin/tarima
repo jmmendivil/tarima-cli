@@ -76,10 +76,7 @@ if (argv.version) {
   die(1);
 }
 
-if (argv.quiet !== true) {
-  logger.writeln($.color.blackBright('⚡ ' + thisPkg.name + ' v' + thisPkg.version + ' - Loading stuff...'));
-  logger.setLevel(argv.verbose ? 'verbose' : argv.debug ? 'debug' : 'info');
-}
+logger.setLevel(argv.verbose ? 'verbose' : argv.debug ? 'debug' : 'info');
 
 var run = require('../lib'),
     spawn = require('child_process').spawn,
@@ -203,7 +200,7 @@ function errLog(message) {
 
 function infoFiles(err, result) {
   if (argv.watch) {
-    logger.INFO('Waiting for changes...');
+    logger.PENDING('Waiting for changes...');
   } else {
     if (!result.files.length) {
       logger.INFO('Without changes (%s)\n', $.timeDiff(result.start));
