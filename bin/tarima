@@ -4,16 +4,14 @@ var path = require('path'),
     minimist = require('minimist');
 
 var argv = minimist(process.argv.slice(2), {
-  boolean: ['quiet', 'debug', 'force', 'watch', 'bundle', 'verbose', 'server', 'open'],
+  boolean: ['debug', 'force', 'watch', 'verbose', 'server', 'open'],
   string: ['ext', 'only', 'exclude', 'require', 'port', 'proxy', 'browser', 'globals', 'config'],
   alias: {
-    q: 'quiet',
     c: 'config',
     v: 'version',
     V: 'verbose',
     r: 'require',
     x: 'exclude',
-    b: 'bundle',
     d: 'debug',
     f: 'force',
     w: 'watch',
@@ -42,7 +40,6 @@ if (argv.help) {
   logger.writeln('USAGE:\n  ' + Object.keys(thisPkg.bin)[0] + ' [SRC] [DEST] [OPTIONS]');
   logger.writeln(function() {/*---
 OPTIONS:
-  -q, --quiet     Disable all logging
   -c, --config    Use configuration file
   -V, --verbose   Increase log information
   -r, --require   Load scripts at startup (e.g. -r some-module -r ./lib/hooks.js)
@@ -59,7 +56,6 @@ OPTIONS:
   -f, --debug     Enable compileDebug flag for some engines
   -f, --force     Compile all sources always
   -w, --watch     Enable file watching for all sources
-  -b, --bundle    Enable script bundling via Browserify (styles, views, etc.)
   -s, --server    Enable web-server support via BrowserSync
                   You can configure this through `serverOptions`
   -o, --open      Enable to open your default (or configured) --browser
@@ -96,7 +92,6 @@ var defaultConfig = {
   cache: path.join(cwd, fixedDest, 'index.json'),
   force: argv.force,
   watch: argv.watch,
-  bundle: argv.bundle,
   require: argv.require,
   server: argv.server,
   open: argv.open,
