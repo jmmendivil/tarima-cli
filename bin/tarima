@@ -15,7 +15,7 @@ var argv = minimist(process.argv.slice(2), {
     d: 'debug',
     f: 'force',
     w: 'watch',
-    i: 'only',
+    y: 'only',
     e: 'ext',
     s: 'server',
     o: 'open',
@@ -52,8 +52,8 @@ OPTIONS:
                     - foo/bar  -> !**\/foo\/bar/**
   -e, --ext       Configure automatic extensions (e.g. -e coffee:js -e jade:hbs:html)
                   This means ".coffee to .js" and ".jade and .hbs to .html" respectively
-  -i, --only      Filter out non-matching sources using String.prototype.indexOf()
-  -f, --debug     Enable compileDebug flag for some engines
+  -y, --only      Filter out non-matching sources using String.prototype.indexOf()
+  -d, --debug     Enable compileDebug flag for some engines
   -f, --force     Compile all sources always
   -w, --watch     Enable file watching for all sources
   -s, --server    Enable web-server support via BrowserSync
