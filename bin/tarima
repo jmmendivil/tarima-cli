@@ -5,7 +5,7 @@ var path = require('path'),
 
 var argv = minimist(process.argv.slice(2), {
   boolean: ['debug', 'force', 'watch', 'verbose', 'server', 'open'],
-  string: ['ext', 'only', 'exclude', 'require', 'port', 'proxy', 'browser', 'globals', 'config'],
+  string: ['map', 'only', 'exclude', 'require', 'port', 'proxy', 'browser', 'globals', 'config'],
   alias: {
     c: 'config',
     v: 'version',
@@ -16,7 +16,7 @@ var argv = minimist(process.argv.slice(2), {
     f: 'force',
     w: 'watch',
     y: 'only',
-    e: 'ext',
+    m: 'map',
     s: 'server',
     o: 'open',
     p: 'port',
@@ -50,7 +50,7 @@ OPTIONS:
                     - x.y      -> !**\/x.y
                     - foo      -> !**\/foo/**
                     - foo/bar  -> !**\/foo\/bar/**
-  -e, --ext       Configure automatic extensions (e.g. -e coffee:js -e jade:hbs:html)
+  -m, --map       Configure extensions mapping (e.g. -e coffee:js -e jade:hbs:html)
                   This means ".coffee to .js" and ".jade and .hbs to .html" respectively
   -y, --only      Filter out non-matching sources using String.prototype.indexOf()
   -d, --debug     Enable compileDebug flag for some engines
@@ -136,8 +136,8 @@ function fixedValue(string) {
   return string || null;
 }
 
-if (argv.ext) {
-  fixedArray(argv.ext).forEach(function(ext) {
+if (argv.map) {
+  fixedArray(argv.map).forEach(function(ext) {
     fixedArray(ext).forEach(function(map) {
       var parts = map.split(':'),
           to = parts.pop();
@@ -153,6 +153,8 @@ if (argv.only) {
   var test = fixedArray(argv.only);
 
   defaultConfig.filtered.push(function(value) {
+    value = path.relative(defaultConfig.src, value);
+
     for (var key in test) {
       if (value.indexOf(test[key]) > -1) {
         return true;
