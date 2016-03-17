@@ -199,13 +199,15 @@ function errLog(message) {
 }
 
 function infoFiles(err, result) {
-  if (argv.watch) {
-    logger.PENDING('Waiting for changes...');
+  if (argv.watch || argv.server) {
+    logger.printf('{pending.blackBright|%s [press CTRL-C to quit]}',
+      argv.watch ? 'Waiting for changes...' : 'Nothing to watch...');
   } else {
     if (!result.files.length) {
-      logger.INFO('Without changes (%s)\n', $.timeDiff(result.start));
+      logger.printf('{info.blackBright|Without changes (%s)}\n', $.timeDiff(result.start));
     } else {
-      logger[(err || (result.err && result.err.length)) ? 'WARN' : 'HINT']('%s of %s file%s in %s\n',
+      logger.printf('{hint.%s|%s of %s file%s in %s}\n',
+        (err || (result.err && result.err.length)) ? 'redBright' : 'greenBright',
         result.ok.length,
         result.files.length,
         result.ok.length !== 1 ? 's' : '',
