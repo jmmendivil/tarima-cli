@@ -248,9 +248,11 @@ function exec(onError) {
   });
 
   child.on('close', function(exitCode) {
-    logger.writeln($.color[exitCode || errors.length  ? 'red' : 'cyan'](cmd[0]) + ' done in ' + $.timeDiff(start));
+    var end = $.timeDiff(start);
 
-    var message = 'Task done in ' + $.timeDiff(start),
+    logger.writeln($.color[exitCode || errors.length  ? 'red' : 'cyan'](cmd[0]) + ' done in ' + end);
+
+    var message = 'Task done in ' + end,
         icon = 'icon.png';
 
     if (exitCode || errors.length) {
@@ -258,7 +260,7 @@ function exec(onError) {
       message = 'Error';
     }
 
-    notify(message, cmd[0] + ' done', icon);
+    notify(message, cmd.join(' '), icon);
 
     if (errors.length) {
       errLog('\n' + errors.join('\n'));
