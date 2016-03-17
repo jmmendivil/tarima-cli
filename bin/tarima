@@ -5,8 +5,9 @@ var path = require('path'),
 
 var argv = minimist(process.argv.slice(2), {
   boolean: ['debug', 'force', 'watch', 'verbose', 'server', 'open'],
-  string: ['map', 'only', 'exclude', 'require', 'port', 'proxy', 'browser', 'globals', 'config'],
+  string: ['map', 'icon', 'only', 'exclude', 'require', 'port', 'proxy', 'browser', 'globals', 'config'],
   alias: {
+    i: 'icon',
     c: 'config',
     v: 'version',
     V: 'verbose',
@@ -40,6 +41,7 @@ if (argv.help) {
   logger.writeln('USAGE:\n  ' + Object.keys(thisPkg.bin)[0] + ' [SRC] [DEST] [OPTIONS]');
   logger.writeln(function() {/*---
 OPTIONS:
+  -i, --icon      Custom icon for node-notifier
   -c, --config    Use configuration file
   -V, --verbose   Increase log information
   -r, --require   Load scripts at startup (e.g. -r some-module -r ./lib/hooks.js)
@@ -90,6 +92,7 @@ var defaultConfig = {
   src: path.join(cwd, fixedSrc),
   dest: path.join(cwd, fixedDest, 'dist'),
   cache: path.join(cwd, fixedDest, 'index.json'),
+  icon: argv.icon,
   force: argv.force,
   watch: argv.watch,
   require: argv.require,
@@ -250,22 +253,22 @@ function exec(onError) {
   child.on('close', function(exitCode) {
     var end = $.timeDiff(start);
 
-    logger.writeln($.color[exitCode || errors.length  ? 'red' : 'cyan'](cmd[0]) + ' done in ' + end);
-
-    var message = 'Task done in ' + end,
-        icon = 'icon.png';
+    var message = 'Done in ' + end,
+        icon = defaultConfig.icon || 'notify-icon.png';
 
     if (exitCode || errors.length) {
-      icon = 'error-' + icon;
+      icon = path.join(path.dirname(icon), 'error-' + path.basename(icon));
       message = 'Error';
     }
 
     notify(message, cmd.join(' '), icon);
 
     if (errors.length) {
-      errLog('\n' + errors.join('\n'));
+      errLog(errors.join('\n'));
       onError(errors.join('\n'));
     }
+
+    logger.writeln($.color[exitCode || errors.length  ? 'red' : 'cyan'](cmd[0]) + ' done in ' + end);
 
     if (exitCode && !argv.watch) {
       die(exitCode);
