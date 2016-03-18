@@ -241,17 +241,18 @@ function exec(onError) {
   child.on('close', function(exitCode) {
     var end = $.timeDiff(start);
 
-    var message = cmd.join(' '),
-        icon = defaultConfig.notifications.okIcon || 'notify-icon.png';
+    var settings = defaultConfig.notifications || {},
+        message = '`' + cmd.join(' ') + '`\n— ',
+        icon = settings.okIcon || path.join(__dirname, 'notify-icon.png');
 
     if (exitCode || errors.length) {
-      icon = defaultConfig.notifications.errIcon || 'error-notify-icon.png';
-      message += '\n— Error';
+      icon = settings.errIcon || path.join(__dirname, 'error-notify-icon.png');
+      message += 'Error';
     } else {
-      message += '\n— Done in ' + end;
+      message += 'Done in ' + end;
     }
 
-    $.notify(message, defaultConfig.notifications.title || cmd[0], icon);
+    $.notify(message, settings.title || thisPkg.name, icon);
 
     if (errors.length) {
       errLog(errors.join('\n'));
