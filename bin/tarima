@@ -99,7 +99,11 @@ var defaultConfig = {
   browser: argv.browser,
   filtered: [],
   extensions: {},
-  notifications: {},
+  notifications: {
+    title: thisPkg.name,
+    okIcon: path.join(__dirname, 'ok.png'),
+    errIcon: path.join(__dirname, 'err.png')
+  },
   compileOptions: {
     globals: {}
   }
@@ -199,14 +203,44 @@ function infoFiles(err, result) {
   if (argv.watch || argv.server) {
     logger.printf('{pending.blackBright|%s [press CTRL-C to quit]}',
       argv.watch ? 'Waiting for changes...' : 'Nothing to watch...');
-  } else if (!result.files.length) {
+
+    // TODO: improve this
+    var msg,
+        max = 10,
+        len = result.files.length;
+
+    var suffix = len > max ? ('(' + (len - max) + ' file' + ((len - max) !== 1 ? 's' : '') + ' more)') : '';
+
+    var hasError = err || (result.err && result.err.length);
+
+    var changes = (hasError ? result.err : result.ok).slice(0, max).map(function(file) {
+      return path.relative(cwd, file);
+    });
+
+    var prelude = changes.join('\n') + (suffix ? '\n' + suffix : '') + '\n— ';
+
+    if (hasError) {
+      msg = prelude + err.message || err.description || err.toString();
+    }
+
+    if (!hasError && result.ok.length) {
+      msg = prelude + result.ok.length + ' file' +
+        (result.ok.length !== 1 ? 's' : '') + ' in ' + $.timeDiff(result.start);
+    }
+
+    if (msg) {
+      var icon = (err || (result.err && result.err.length))
+        ? defaultConfig.notifications.errIcon
+        : defaultConfig.notifications.okIcon;
+
+      $.notify(msg, defaultConfig.notifications.title, icon);
+    }
+
+    return;
+  }
+
+  if (!result.files.length) {
     logger.printf('{info.blackBright|Without changes (%s)}\n', $.timeDiff(result.start));
-  } else if (!(err || (result.err && result.err.length))) {
-    logger.printf('{hint.greenBright|%s of %s file%s in %s}\n',
-      result.ok.length,
-      result.files.length,
-      result.ok.length !== 1 ? 's' : '',
-      $.timeDiff(result.start));
   }
 }
 
@@ -236,18 +270,17 @@ function exec(onError) {
   child.on('close', function(exitCode) {
     var end = $.timeDiff(start);
 
-    var settings = defaultConfig.notifications || {},
-        message = '`' + cmd.join(' ') + '`\n— ',
-        icon = settings.okIcon || path.join(__dirname, 'notify-icon.png');
+    var message = '`' + cmd.join(' ') + '`\n— ',
+        icon = defaultConfig.notifications.okIcon;
 
     if (exitCode || errors.length) {
-      icon = settings.errIcon || path.join(__dirname, 'error-notify-icon.png');
+      icon = defaultConfig.notifications.errIcon;
       message += 'Error';
     } else {
       message += 'Done in ' + end;
     }
 
-    $.notify(message, settings.title || thisPkg.name, icon);
+    $.notify(message, defaultConfig.notifications.title, icon);
 
     if (errors.length) {
       errLog(errors.join('\n'));
