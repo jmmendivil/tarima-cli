@@ -5,9 +5,8 @@ var path = require('path'),
 
 var argv = minimist(process.argv.slice(2), {
   boolean: ['debug', 'force', 'watch', 'verbose', 'server', 'open'],
-  string: ['map', 'icon', 'only', 'exclude', 'require', 'port', 'proxy', 'browser', 'globals', 'config'],
+  string: ['map', 'only', 'exclude', 'require', 'port', 'proxy', 'browser', 'globals', 'config'],
   alias: {
-    i: 'icon',
     c: 'config',
     v: 'version',
     V: 'verbose',
@@ -41,7 +40,6 @@ if (argv.help) {
   logger.writeln('USAGE:\n  ' + Object.keys(thisPkg.bin)[0] + ' [SRC] [DEST] [OPTIONS]');
   logger.writeln(function() {/*---
 OPTIONS:
-  -i, --icon      Custom icon for node-notifier
   -c, --config    Use configuration file
   -V, --verbose   Increase log information
   -r, --require   Load scripts at startup (e.g. -r some-module -r ./lib/hooks.js)
@@ -91,7 +89,6 @@ var defaultConfig = {
   src: path.join(cwd, fixedSrc),
   dest: path.join(cwd, fixedDest, 'dist'),
   cache: path.join(cwd, fixedDest, 'index.json'),
-  icon: argv.icon,
   force: argv.force,
   watch: argv.watch,
   require: argv.require,
@@ -101,7 +98,8 @@ var defaultConfig = {
   proxy: argv.proxy,
   browser: argv.browser,
   filtered: [],
-  extensions:{},
+  extensions: {},
+  notifications: {},
   compileOptions: {
     globals: {}
   }
@@ -201,17 +199,14 @@ function infoFiles(err, result) {
   if (argv.watch || argv.server) {
     logger.printf('{pending.blackBright|%s [press CTRL-C to quit]}',
       argv.watch ? 'Waiting for changes...' : 'Nothing to watch...');
-  } else {
-    if (!result.files.length) {
-      logger.printf('{info.blackBright|Without changes (%s)}\n', $.timeDiff(result.start));
-    } else {
-      logger.printf('{hint.%s|%s of %s file%s in %s}\n',
-        (err || (result.err && result.err.length)) ? 'redBright' : 'greenBright',
-        result.ok.length,
-        result.files.length,
-        result.ok.length !== 1 ? 's' : '',
-        $.timeDiff(result.start));
-    }
+  } else if (!result.files.length) {
+    logger.printf('{info.blackBright|Without changes (%s)}\n', $.timeDiff(result.start));
+  } else if (!(err || (result.err && result.err.length))) {
+    logger.printf('{hint.greenBright|%s of %s file%s in %s}\n',
+      result.ok.length,
+      result.files.length,
+      result.ok.length !== 1 ? 's' : '',
+      $.timeDiff(result.start));
   }
 }
 
