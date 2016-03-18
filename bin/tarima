@@ -50,7 +50,7 @@ OPTIONS:
                     - x.y      -> !**\/x.y
                     - foo      -> !**\/foo/**
                     - foo/bar  -> !**\/foo\/bar/**
-  -m, --map       Configure extensions mapping (e.g. -e coffee:js -e jade:hbs:html)
+  -m, --map       Configure extensions mapping (e.g. -m coffee:js -m jade:hbs:html)
                   This means ".coffee to .js" and ".jade and .hbs to .html" respectively
   -y, --only      Filter out non-matching sources using String.prototype.indexOf()
   -d, --debug     Enable compileDebug flag for some engines
