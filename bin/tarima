@@ -77,8 +77,7 @@ if (argv.version) {
 logger.setLevel(argv.verbose ? 'verbose' : argv.debug ? 'debug' : 'info');
 
 var run = require('../lib'),
-    spawn = require('child_process').spawn,
-    notifier =  require('node-notifier');
+    spawn = require('child_process').spawn;
 
 var cwd = process.cwd(),
     pkg = path.join(cwd, 'package.json'),
@@ -216,19 +215,6 @@ function infoFiles(err, result) {
   }
 }
 
-function notify(message, title, icon) {
-  var noticeObj = {
-    title: title || thisPkg.name,
-    message: message
-  };
-
-  if ($.exists(icon)) {
-    noticeObj.icon = path.resolve(icon);
-  }
-
-  notifier.notify(noticeObj);
-}
-
 function exec(onError) {
   if (child) {
     child.kill();
@@ -255,15 +241,17 @@ function exec(onError) {
   child.on('close', function(exitCode) {
     var end = $.timeDiff(start);
 
-    var message = 'Done in ' + end,
-        icon = defaultConfig.icon || 'notify-icon.png';
+    var message = cmd.join(' '),
+        icon = defaultConfig.notifications.okIcon || 'notify-icon.png';
 
     if (exitCode || errors.length) {
-      icon = path.join(path.dirname(icon), 'error-' + path.basename(icon));
-      message = 'Error';
+      icon = defaultConfig.notifications.errIcon || 'error-notify-icon.png';
+      message += '\n— Error';
+    } else {
+      message += '\n— Done in ' + end;
     }
 
-    notify(message, cmd.join(' '), icon);
+    $.notify(message, defaultConfig.notifications.title || cmd[0], icon);
 
     if (errors.length) {
       errLog(errors.join('\n'));
