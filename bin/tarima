@@ -229,11 +229,9 @@ function infoFiles(err, result) {
     }
 
     if (msg) {
-      var icon = (err || (result.err && result.err.length))
-        ? defaultConfig.notifications.errIcon
-        : defaultConfig.notifications.okIcon;
-
-      $.notify(msg, defaultConfig.notifications.title, icon);
+      $.notify(msg,
+        defaultConfig.notifications.title,
+        defaultConfig.notifications[hasError ? 'errIcon' : 'okIcon']);
     }
 
     return;
