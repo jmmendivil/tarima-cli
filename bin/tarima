@@ -4,9 +4,10 @@ var path = require('path'),
     minimist = require('minimist');
 
 var argv = minimist(process.argv.slice(2), {
-  boolean: ['debug', 'force', 'watch', 'verbose', 'server', 'open'],
+  boolean: ['debug', 'force', 'quiet', 'watch', 'verbose', 'server', 'open'],
   string: ['map', 'only', 'exclude', 'require', 'port', 'proxy', 'browser', 'globals', 'config'],
   alias: {
+    q: 'quiet',
     c: 'config',
     v: 'version',
     V: 'verbose',
@@ -40,6 +41,7 @@ if (argv.help) {
   logger.writeln('USAGE:\n  ' + Object.keys(thisPkg.bin)[0] + ' [SRC] [DEST] [OPTIONS]');
   logger.writeln(function() {/*---
 OPTIONS:
+  -q, --quiet     Disable all logs
   -c, --config    Use configuration file
   -V, --verbose   Increase log information
   -r, --require   Load scripts at startup (e.g. -r some-module -r ./lib/hooks.js)
@@ -72,7 +74,9 @@ if (argv.version) {
   die(1);
 }
 
-logger.setLevel(argv.verbose ? 'verbose' : argv.debug ? 'debug' : 'info');
+if (!argv.quiet) {
+  logger.setLevel(argv.verbose ? 'verbose' : argv.debug ? 'debug' : 'info');
+}
 
 var run = require('../lib'),
     spawn = require('child_process').spawn;
@@ -207,31 +211,29 @@ function infoFiles(err, result) {
     // TODO: improve this
     var msg,
         max = 10,
-        len = result.files.length;
+        len = result.stats.length;
 
     var suffix = len > max ? ('(' + (len - max) + ' file' + ((len - max) !== 1 ? 's' : '') + ' more)') : '';
 
-    var hasError = err || (result.err && result.err.length);
-
-    var changes = (hasError ? result.err : result.ok).slice(0, max).map(function(file) {
-      return path.relative(cwd, file);
+    var changes = result.stats.slice(0, max).map(function(file) {
+      return path.relative(cwd, file.dest);
     });
 
     var prelude = changes.join('\n') + (suffix ? '\n' + suffix : '') + '\n— ';
 
-    if (hasError) {
+    if (err) {
       msg = prelude + err.message || err.description || err.toString();
     }
 
-    if (!hasError && result.ok.length) {
-      msg = prelude + result.ok.length + ' file' +
-        (result.ok.length !== 1 ? 's' : '') + ' in ' + $.timeDiff(result.start);
+    if (!err && result.stats.length) {
+      msg = prelude + result.stats.length + ' file' +
+        (result.stats.length !== 1 ? 's' : '') + ' in ' + result.elapsed;
     }
 
     if (msg) {
       $.notify(msg,
         defaultConfig.notifications.title,
-        defaultConfig.notifications[hasError ? 'errIcon' : 'okIcon']);
+        defaultConfig.notifications[err ? 'errIcon' : 'okIcon']);
     }
 
     return;
@@ -292,6 +294,9 @@ function exec(onError) {
     }
   });
 }
+
+logger.INFO('Processing files from `%s`\n', path.relative(cwd, defaultConfig.src));
+logger.INFO('Compiling to `%s`\n', path.relative(cwd, defaultConfig.dest));
 
 run(defaultConfig, function(err, result) {
   if (err) {
