@@ -93,6 +93,7 @@ var defaultConfig = {
   src: path.join(cwd, fixedSrc),
   dest: path.join(cwd, fixedDest, 'dist'),
   cache: path.join(cwd, fixedDest, 'index.json'),
+  filter: [],
   force: argv.force,
   watch: argv.watch,
   require: argv.require,
@@ -101,7 +102,6 @@ var defaultConfig = {
   port: argv.port,
   proxy: argv.proxy,
   browser: argv.browser,
-  filtered: [],
   extensions: {},
   notifications: {
     title: thisPkg.name,
@@ -160,7 +160,7 @@ if (argv.map) {
 if (argv.only) {
   var test = fixedArray(argv.only);
 
-  defaultConfig.filtered.push(function(value) {
+  defaultConfig.filter.push(function(value) {
     value = path.relative(defaultConfig.src, value);
 
     for (var key in test) {
@@ -174,13 +174,13 @@ if (argv.only) {
 if (argv.exclude) {
   fixedArray(argv.exclude).forEach(function(skip) {
     if (skip.indexOf('*') > -1) {
-      defaultConfig.filtered.push('!' + skip);
+      defaultConfig.filter.push('!' + skip);
     } else if (skip.substr(0, 1) === '.') {
-      defaultConfig.filtered.push('!**/*' + skip);
+      defaultConfig.filter.push('!**/*' + skip);
     } else if (skip.indexOf('.') > -1) {
-      defaultConfig.filtered.push('!**/' + skip);
+      defaultConfig.filter.push('!**/' + skip);
     } else {
-      defaultConfig.filtered.push('!**/' + skip + '/**');
+      defaultConfig.filter.push('!**/' + skip + '/**');
     }
   });
 }
