@@ -205,8 +205,9 @@ function errLog(message) {
 
 function infoFiles(err, result) {
   if (argv.watch || argv.server) {
-    logger.printf('{pending.blackBright|%s [press CTRL-C to quit]}\n',
-      argv.watch ? 'Waiting for changes...' : 'Nothing to watch...');
+    if (!argv.watch) {
+      logger.printf('{pending.blackBright|Nothing to watch... [press CTRL-C to quit]}\n');
+    }
 
     // TODO: improve this
     var msg,
