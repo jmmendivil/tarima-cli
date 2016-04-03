@@ -211,7 +211,7 @@ function infoFiles(err, result) {
 
     // TODO: improve this
     var msg,
-        max = 10,
+        max = 3,
         len = result.stats.length;
 
     var suffix = len > max ? ('(' + (len - max) + ' file' + ((len - max) !== 1 ? 's' : '') + ' more)') : '';
