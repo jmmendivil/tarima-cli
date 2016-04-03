@@ -212,11 +212,11 @@ function infoFiles(err, result) {
     // TODO: improve this
     var msg,
         max = 3,
-        len = result.stats.length;
+        len = result.changedFiles.length;
 
     var suffix = len > max ? ('(' + (len - max) + ' file' + ((len - max) !== 1 ? 's' : '') + ' more)') : '';
 
-    var changes = result.stats.slice(0, max).map(function(file) {
+    var changes = result.changedFiles.slice(0, max).map(function(file) {
       return path.relative(cwd, file.dest);
     });
 
@@ -226,9 +226,9 @@ function infoFiles(err, result) {
       msg = prelude + err.message || err.description || err.toString();
     }
 
-    if (!err && result.stats.length) {
-      msg = prelude + result.stats.length + ' file' +
-        (result.stats.length !== 1 ? 's' : '') + ' in ' + result.elapsed;
+    if (!err && result.changedFiles.length) {
+      msg = prelude + result.changedFiles.length + ' file' +
+        (result.changedFiles.length !== 1 ? 's' : '') + ' in ' + result.elapsed;
     }
 
     if (msg) {
