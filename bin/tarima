@@ -246,58 +246,71 @@ function infoFiles(err, result) {
 }
 
 function exec(onError) {
-  if (child) {
-    child.kill();
+  function start() {
+    var start = new Date();
+
+    logger.writeln($.color.cyan(cmd[0]) + ' ' + cmd.slice(1).join(' '));
+
+    child = spawn(cmd[0], cmd.slice(1), { detached: true });
+
+    child.stdout.pipe(process.stdout);
+
+    var errors = [];
+
+    child.stderr.on('data', function(data) {
+      var line = data.toString().trim();
+
+      if (line) {
+        errors.push(line);
+      }
+    });
+
+    child.on('close', function(exitCode) {
+      var end = $.timeDiff(start);
+
+      var message = '`' + cmd.join(' ') + '`\n— ',
+          icon = defaultConfig.notifications.okIcon;
+
+      if (exitCode || errors.length) {
+        icon = defaultConfig.notifications.errIcon;
+        message += 'Error';
+      } else {
+        message += 'Done in ' + end;
+      }
+
+      $.notify(message, defaultConfig.notifications.title, icon);
+
+      if (errors.length) {
+        errLog(errors.join('\n'));
+        onError(errors.join('\n'));
+      }
+
+      logger.writeln($.color[exitCode || errors.length  ? 'red' : 'cyan'](cmd[0]) + ' done in ' + end);
+
+      if (exitCode && !argv.watch) {
+        die(exitCode);
+      }
+    });
   }
 
-  var start = new Date();
-
-  logger.writeln($.color.cyan(cmd[0]) + ' ' + cmd.slice(1).join(' '));
-
-  child = spawn(cmd[0], cmd.slice(1));
-
-  child.stdout.pipe(process.stdout);
-
-  var errors = [];
-
-  child.stderr.on('data', function(data) {
-    var line = data.toString().trim();
-
-    if (line) {
-      errors.push(line);
-    }
-  });
-
-  child.on('close', function(exitCode) {
-    var end = $.timeDiff(start);
-
-    var message = '`' + cmd.join(' ') + '`\n— ',
-        icon = defaultConfig.notifications.okIcon;
-
-    if (exitCode || errors.length) {
-      icon = defaultConfig.notifications.errIcon;
-      message += 'Error';
-    } else {
-      message += 'Done in ' + end;
-    }
-
-    $.notify(message, defaultConfig.notifications.title, icon);
-
-    if (errors.length) {
-      errLog(errors.join('\n'));
-      onError(errors.join('\n'));
-    }
-
-    logger.writeln($.color[exitCode || errors.length  ? 'red' : 'cyan'](cmd[0]) + ' done in ' + end);
-
-    if (exitCode && !argv.watch) {
-      die(exitCode);
-    }
-  });
+  if (child) {
+    child.on('close', start)
+    child.kill('SIGINT');
+  } else {
+    start();
+  }
 }
 
 logger.INFO('Processing files from `%s`\n', path.relative(cwd, defaultConfig.src));
 logger.INFO('Compiling to `%s`\n', path.relative(cwd, defaultConfig.dest));
+
+process.on('SIGINT', function() {
+  if (child) {
+    logger.writeln('\r' + $.color.cyan(cmd[0]) + ' done (SIGINT)');
+    child.kill('SIGINT');
+    process.exit();
+  }
+});
 
 run(defaultConfig, function(err, result) {
   if (err) {
