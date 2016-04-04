@@ -308,8 +308,9 @@ process.on('SIGINT', function() {
   if (child) {
     logger.writeln('\r' + $.color.cyan(cmd[0]) + ' done (SIGINT)');
     child.kill('SIGINT');
-    process.exit();
   }
+
+  process.exit();
 });
 
 run(defaultConfig, function(err, result) {
