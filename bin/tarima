@@ -108,7 +108,7 @@ var defaultConfig = {
     okIcon: path.join(__dirname, 'ok.png'),
     errIcon: path.join(__dirname, 'err.png')
   },
-  compileOptions: {
+  bundleOptions: {
     globals: {}
   }
 };
@@ -189,12 +189,12 @@ if (argv.globals) {
   fixedArray(argv.globals).forEach(function(value) {
     var parts = value.split('=');
 
-    defaultConfig.compileOptions.globals[parts[0]] = fixedValue(parts[1]);
+    defaultConfig.bundleOptions.globals[parts[0]] = fixedValue(parts[1]);
   });
 }
 
-defaultConfig.compileOptions.compileDebug = argv.debug;
-defaultConfig.compileOptions.verboseDebug = argv.verbose;
+defaultConfig.bundleOptions.compileDebug = argv.debug;
+defaultConfig.bundleOptions.verboseDebug = argv.verbose;
 
 var cmd = argv['--'],
     child;
