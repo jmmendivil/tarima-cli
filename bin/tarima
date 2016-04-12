@@ -52,8 +52,6 @@ OPTIONS:
                     - x.y      -> !**\/x.y
                     - foo      -> !**\/foo/**
                     - foo/bar  -> !**\/foo\/bar/**
-  -m, --map       Configure extensions mapping (e.g. -m coffee:js -m jade:hbs:html)
-                  This means ".coffee to .js" and ".jade and .hbs to .html" respectively
   -y, --only      Filter out non-matching sources using String.prototype.indexOf()
   -d, --debug     Enable compileDebug flag for some engines
   -f, --force     Compile all sources always
@@ -102,7 +100,6 @@ var defaultConfig = {
   port: argv.port,
   proxy: argv.proxy,
   browser: argv.browser,
-  extensions: {},
   notifications: {
     title: thisPkg.name,
     okIcon: path.join(__dirname, 'ok.png'),
@@ -142,19 +139,6 @@ function fixedValue(string) {
   }
 
   return string || null;
-}
-
-if (argv.map) {
-  fixedArray(argv.map).forEach(function(ext) {
-    fixedArray(ext).forEach(function(map) {
-      var parts = map.split(':'),
-          to = parts.pop();
-
-      parts.forEach(function(key) {
-        defaultConfig.extensions[key] = to;
-      });
-    });
-  });
 }
 
 if (argv.only) {
