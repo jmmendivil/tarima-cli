@@ -91,6 +91,7 @@ var defaultConfig = {
   src: path.join(cwd, fixedSrc),
   dest: path.join(cwd, fixedDest, 'dist'),
   cache: path.join(cwd, fixedDest, 'index.json'),
+  public: path.join(cwd, fixedDest, 'dist', 'public'),
   filter: [],
   force: argv.force,
   watch: argv.watch,
