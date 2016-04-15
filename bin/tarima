@@ -199,24 +199,14 @@ function infoFiles(err, result) {
     }
 
     // TODO: improve this
-    var msg,
-        max = 3,
-        len = result.changedFiles.length;
-
-    var suffix = len > max ? ('(' + (len - max) + ' file' + ((len - max) !== 1 ? 's' : '') + ' more)') : '';
-
-    var changes = result.changedFiles.slice(0, max).map(function(file) {
-      return path.relative(cwd, file.dest);
-    });
-
-    var prelude = changes.join('\n') + (suffix ? '\n' + suffix : '') + '\n— ';
+    var msg;
 
     if (err) {
-      msg = prelude + err.message || err.description || err.toString();
+      msg = err.message || err.description || err.toString();
     }
 
     if (!err && result.changedFiles.length) {
-      msg = prelude + result.changedFiles.length + ' file' +
+      msg = result.changedFiles.length + ' file' +
         (result.changedFiles.length !== 1 ? 's' : '') + ' in ' + result.elapsed;
     }
 
