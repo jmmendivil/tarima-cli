@@ -5,13 +5,13 @@ var path = require('path'),
 
 var argv = minimist(process.argv.slice(2), {
   boolean: ['debug', 'force', 'quiet', 'watch', 'verbose', 'server', 'open'],
-  string: ['map', 'only', 'exclude', 'require', 'port', 'proxy', 'browser', 'globals', 'config'],
+  string: ['map', 'only', 'exclude', 'plugins', 'port', 'proxy', 'browser', 'globals', 'config'],
   alias: {
     q: 'quiet',
     c: 'config',
     v: 'version',
     V: 'verbose',
-    r: 'require',
+    r: 'plugins',
     x: 'exclude',
     d: 'debug',
     f: 'force',
@@ -44,7 +44,7 @@ OPTIONS:
   -q, --quiet     Disable all logs
   -c, --config    Use configuration file
   -V, --verbose   Increase log information
-  -r, --require   Load scripts at startup (e.g. -r some-module -r ./lib/hooks.js)
+  -r, --plugins   Load scripts at startup (e.g. -r some-module -r ./lib/hooks.js)
   -x, --exclude   Filter out sources using globs (e.g. -x test/broken -x .coffee)
                   Example patterns:
                     - *foo     -> !*foo
@@ -95,7 +95,7 @@ var defaultConfig = {
   filter: [],
   force: argv.force,
   watch: argv.watch,
-  require: argv.require,
+  plugins: argv.plugins,
   server: argv.server,
   open: argv.open,
   port: argv.port,
