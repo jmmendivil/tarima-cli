@@ -5,13 +5,12 @@ var path = require('path'),
 
 var argv = minimist(process.argv.slice(2), {
   boolean: ['debug', 'force', 'quiet', 'watch', 'verbose', 'server', 'open'],
-  string: ['map', 'only', 'exclude', 'plugins', 'port', 'proxy', 'browser', 'globals', 'config'],
+  string: ['map', 'only', 'exclude', 'port', 'proxy', 'browser', 'globals', 'config'],
   alias: {
     q: 'quiet',
     c: 'config',
     v: 'version',
     V: 'verbose',
-    r: 'plugins',
     x: 'exclude',
     d: 'debug',
     f: 'force',
@@ -44,7 +43,6 @@ OPTIONS:
   -q, --quiet     Disable all logs
   -c, --config    Use configuration file
   -V, --verbose   Increase log information
-  -r, --plugins   Load scripts at startup (e.g. -r some-module -r ./lib/hooks.js)
   -x, --exclude   Filter out sources using globs (e.g. -x test/broken -x .coffee)
                   Example patterns:
                     - *foo     -> !*foo
@@ -80,8 +78,7 @@ var run = require('../lib'),
     spawn = require('child_process').spawn;
 
 var cwd = process.cwd(),
-    pkg = path.join(cwd, 'package.json'),
-    bower = path.join(cwd, 'bower.json');
+    pkg = path.join(cwd, 'package.json');
 
 var fixedSrc = argv._[0] || 'src',
     fixedDest = argv._[1] || 'build';
@@ -93,9 +90,9 @@ var defaultConfig = {
   cache: path.join(cwd, fixedDest, 'index.json'),
   public: path.join(cwd, fixedDest, 'dist'),
   filter: [],
+  plugins: [],
   force: argv.force,
   watch: argv.watch,
-  plugins: argv.plugins,
   server: argv.server,
   open: argv.open,
   port: argv.port,
@@ -107,15 +104,22 @@ var defaultConfig = {
     errIcon: path.join(__dirname, 'err.png')
   },
   bundleOptions: {
-    globals: {}
+    globals: {},
+    locals: {}
   }
 };
 
-[pkg, bower].forEach(function (file) {
-  if ($.isFile(file)) {
-    $.merge(defaultConfig, $.readJSON(file).tarima || {});
-  }
-});
+if ($.isFile(pkg)) {
+  var mainPkg = $.readJSON(pkg);
+
+  $.merge(defaultConfig, mainPkg.tarima || {});
+
+  Object.keys(mainPkg.devDependencies || {}).forEach(function(dep) {
+    if (dep !== 'tarima-cli' && dep.indexOf('tarima-') === 0) {
+      defaultConfig.plugins.push(dep);
+    }
+  });
+}
 
 if ($.isFile(argv.config)) {
   $.merge(defaultConfig, $.readJSON(argv.config) || {});
