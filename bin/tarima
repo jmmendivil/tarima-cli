@@ -104,8 +104,7 @@ var defaultConfig = {
     errIcon: path.join(__dirname, 'err.png')
   },
   bundleOptions: {
-    globals: {},
-    locals: {}
+    globals: {}
   }
 };
 
@@ -273,7 +272,7 @@ function exec(onError) {
   }
 
   if (child) {
-    child.on('close', start)
+    child.on('close', start);
     child.kill('SIGINT');
   } else {
     start();
