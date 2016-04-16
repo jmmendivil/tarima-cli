@@ -280,8 +280,9 @@ function exec(onError) {
   }
 }
 
-logger.INFO('Processing files from `%s`\n', path.relative(cwd, defaultConfig.src));
-logger.INFO('Compiling to `%s`\n', path.relative(cwd, defaultConfig.dest));
+logger.getLogger()
+  .INFO('Processing files from `%s`\n', path.relative(cwd, defaultConfig.src))
+  .INFO('Compiling to `%s`\n', path.relative(cwd, defaultConfig.dest));
 
 process.on('SIGINT', function() {
   if (child) {
