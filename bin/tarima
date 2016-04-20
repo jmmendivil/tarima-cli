@@ -298,7 +298,8 @@ run(defaultConfig, function(err, result) {
   }
 
   if (result) {
-    infoFiles(err, result);
+    // infoFiles(err, result);
+    console.log(result);
   }
 
   if (!argv.watch && err) {
