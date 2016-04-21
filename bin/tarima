@@ -204,9 +204,9 @@ function infoFiles(err, result) {
       msg = err.message || err.description || err.toString();
     }
 
-    if (!err && result.changedFiles.length) {
-      msg = result.changedFiles.length + ' file' +
-        (result.changedFiles.length !== 1 ? 's' : '') + ' in ' + result.elapsed;
+    if (!err && result.output.length) {
+      msg = result.output.length + ' file' +
+        (result.output.length !== 1 ? 's' : '') + ' in ' + result.elapsed;
     }
 
     if (msg) {
@@ -214,12 +214,13 @@ function infoFiles(err, result) {
         defaultConfig.notifications.title,
         defaultConfig.notifications[err ? 'errIcon' : 'okIcon']);
     }
-
-    return;
-  }
-
-  if (!result.files.length) {
-    logger.printf('{info.blackBright|Without changes (%s)}\n', $.timeDiff(result.start));
+  } else if (!result.output.length) {
+    logger.printf('{info.blackBright|Without changes (%s)}\n', result.elapsed);
+  } else {
+    logger.printf('\r{info.blackBright|%s file%s written in %s}\n',
+      result.output.length,
+      result.output.length !== 1 ? 's' : '',
+      result.elapsed);
   }
 }
 
@@ -298,8 +299,7 @@ run(defaultConfig, function(err, result) {
   }
 
   if (result) {
-    // infoFiles(err, result);
-    console.log(result);
+    infoFiles(err, result);
   }
 
   if (!argv.watch && err) {
