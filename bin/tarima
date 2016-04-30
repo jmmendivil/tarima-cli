@@ -266,7 +266,7 @@ function exec(onError) {
 
       if (errors.length) {
         errLog(errors.join('\n'));
-        onError(errors.join('\n'));
+        onError({ msg: errors.join('\n') });
       }
 
       logger.writeln($.color[exitCode || errors.length  ? 'red' : 'cyan'](cmd[0]) + ' done in ' + end);
