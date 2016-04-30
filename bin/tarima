@@ -43,7 +43,7 @@ if (argv.help) {
 OPTIONS:
   -q, --quiet     Disable all logs
   -c, --config    Use configuration file
-  -l, --plugins   Load external modules as plugins
+  -l, --plugins   Load external modules as plugins (e.g. -l foo,bar)
   -V, --verbose   Increase log information
   -x, --exclude   Filter out sources using globs (e.g. -x test/broken -x .coffee)
                   Example patterns:
@@ -56,7 +56,7 @@ OPTIONS:
   -d, --debug     Enable compileDebug flag for some engines
   -f, --force     Compile all sources always
   -w, --watch     Enable file watching for all sources
-  -s, --server    Enable web-server support via BrowserSync
+  -s, --server    Enable web-server support (requires tarima-browser-sync)
                   You can configure this through `serverOptions`
   -o, --open      Enable to open your default (or configured) --browser
   -p, --port      Set a different port for BrowserSync (default: 3000)
@@ -300,12 +300,16 @@ process.on('SIGINT', function() {
 
 run(defaultConfig, function(err, result) {
   if (err) {
-    errLog(err.message || err.toString());
-  }
+    logger.erase('lineLeft');
 
-  if (argv.watch) {
-    logger.getLogger()
-      .INFO('Waiting for changes... [press CTRL-C to quit]');
+    if (err.filepath) {
+      errLog('\rError in ' + path.relative(cwd, err.filepath) + ':');
+    }
+
+    errLog((err.message || err.toString()).split('\n').map(function(line) {
+      return '  ' + line;
+    }).join('\n'));
+    return;
   }
 
   if (result) {
@@ -318,6 +322,11 @@ run(defaultConfig, function(err, result) {
     }
 
     die(1);
+  }
+
+  if (result && argv.watch) {
+    logger.getLogger()
+      .INFO('Waiting for changes... [press CTRL-C to quit]');
   }
 
   if (cmd.length && !err) {
