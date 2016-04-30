@@ -5,13 +5,14 @@ var path = require('path'),
 
 var argv = minimist(process.argv.slice(2), {
   boolean: ['debug', 'force', 'quiet', 'watch', 'verbose', 'server', 'open'],
-  string: ['map', 'only', 'exclude', 'port', 'proxy', 'browser', 'globals', 'config'],
+  string: ['map', 'only', 'exclude', 'port', 'proxy', 'browser', 'globals', 'config', 'plugins'],
   alias: {
     q: 'quiet',
     c: 'config',
     v: 'version',
     V: 'verbose',
     x: 'exclude',
+    l: 'plugins',
     d: 'debug',
     f: 'force',
     w: 'watch',
@@ -42,6 +43,7 @@ if (argv.help) {
 OPTIONS:
   -q, --quiet     Disable all logs
   -c, --config    Use configuration file
+  -l, --plugins   Load external modules as plugins
   -V, --verbose   Increase log information
   -x, --exclude   Filter out sources using globs (e.g. -x test/broken -x .coffee)
                   Example patterns:
@@ -90,7 +92,7 @@ var defaultConfig = {
   cache: path.join(cwd, fixedDest, 'index.json'),
   public: path.join(cwd, fixedDest, 'dist'),
   filter: [],
-  plugins: [],
+  plugins: argv.plugins ? argv.plugins.split(',') : [],
   force: argv.force,
   watch: argv.watch,
   server: argv.server,
@@ -303,7 +305,7 @@ run(defaultConfig, function(err, result) {
 
   if (argv.watch) {
     logger.getLogger()
-      .INFO('Waiting for changes ...');
+      .INFO('Waiting for changes... [press CTRL-C to quit]');
   }
 
   if (result) {
