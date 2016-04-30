@@ -194,7 +194,8 @@ function errLog(message) {
 function infoFiles(err, result) {
   if (argv.watch || argv.server) {
     if (!argv.watch) {
-      logger.printf('{pending.blackBright|Nothing to watch... [press CTRL-C to quit]}\n');
+      logger.getLogger()
+        .INFO('Nothing to watch... [press CTRL-C to quit]\n');
     }
 
     // TODO: improve this
@@ -215,9 +216,11 @@ function infoFiles(err, result) {
         defaultConfig.notifications[err ? 'errIcon' : 'okIcon']);
     }
   } else if (!result.output.length) {
-    logger.printf('{info.blackBright|Without changes (%s)}\n', result.elapsed);
+    logger.getLogger()
+      .INFO('Without changes (%s)\n', result.elapsed);
   } else {
-    logger.printf('\r{info.blackBright|%s file%s written in %s}\n',
+    logger.getLogger()
+      .INFO('%s file%s written in %s\n',
       result.output.length,
       result.output.length !== 1 ? 's' : '',
       result.elapsed);
@@ -281,8 +284,8 @@ function exec(onError) {
 }
 
 logger.getLogger()
-  .INFO('Processing files from `%s`\n', path.relative(cwd, defaultConfig.src))
-  .INFO('Compiling to `%s`\n', path.relative(cwd, defaultConfig.dest));
+  .INFO('Processing sources from `%s`\n', path.relative(cwd, defaultConfig.src))
+  .INFO('Writting files to `%s`\n', path.relative(cwd, defaultConfig.dest));
 
 process.on('SIGINT', function() {
   if (child) {
@@ -296,6 +299,11 @@ process.on('SIGINT', function() {
 run(defaultConfig, function(err, result) {
   if (err) {
     errLog(err.message || err.toString());
+  }
+
+  if (argv.watch) {
+    logger.getLogger()
+      .INFO('Waiting for changes ...');
   }
 
   if (result) {
