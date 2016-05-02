@@ -194,14 +194,8 @@ function errLog(message) {
 }
 
 function infoFiles(result) {
-  if (argv.watch || argv.server) {
-    if (!argv.watch) {
-      logger.getLogger()
-        .INFO('Nothing to watch... [press CTRL-C to quit]\n');
-    }
-
-    // TODO: improve this?
-    if (!result.errors.length && result.output.length) {
+  if (argv.watch) {
+    if (result.output.length) {
       $.notify(result.output.length + ' file' + (result.output.length !== 1 ? 's' : '') + ' in ' + result.elapsed,
         defaultConfig.notifications.title,
         defaultConfig.notifications.okIcon);
@@ -291,10 +285,16 @@ run(defaultConfig, function(err, result) {
   if (err) {
     logger.erase('lineLeft');
     errLog(err.message || err.toString());
+    // TODO: print stack if verbose?
     return;
   }
 
-  if (result) {
+  if (argv.server && !argv.watch) {
+    logger.getLogger()
+      .INFO('Nothing to watch... [press CTRL-C to quit]\n');
+  }
+
+  if (result && result.output) {
     infoFiles(result);
   }
 
