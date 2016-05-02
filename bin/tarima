@@ -193,29 +193,18 @@ function errLog(message) {
   process.stderr.write($.color.red(message) + '\n');
 }
 
-function infoFiles(err, result) {
+function infoFiles(result) {
   if (argv.watch || argv.server) {
     if (!argv.watch) {
       logger.getLogger()
         .INFO('Nothing to watch... [press CTRL-C to quit]\n');
     }
 
-    // TODO: improve this
-    var msg;
-
-    if (err) {
-      msg = err.message || err.description || err.toString();
-    }
-
-    if (!err && result.output.length) {
-      msg = result.output.length + ' file' +
-        (result.output.length !== 1 ? 's' : '') + ' in ' + result.elapsed;
-    }
-
-    if (msg) {
-      $.notify(msg,
+    // TODO: improve this?
+    if (!result.errors.length && result.output.length) {
+      $.notify(result.output.length + ' file' + (result.output.length !== 1 ? 's' : '') + ' in ' + result.elapsed,
         defaultConfig.notifications.title,
-        defaultConfig.notifications[err ? 'errIcon' : 'okIcon']);
+        defaultConfig.notifications.okIcon);
     }
   } else if (!result.output.length) {
     logger.getLogger()
@@ -223,9 +212,9 @@ function infoFiles(err, result) {
   } else {
     logger.getLogger()
       .INFO('%s file%s written in %s\n',
-      result.output.length,
-      result.output.length !== 1 ? 's' : '',
-      result.elapsed);
+        result.output.length,
+        result.output.length !== 1 ? 's' : '',
+        result.elapsed);
   }
 }
 
@@ -301,19 +290,12 @@ process.on('SIGINT', function() {
 run(defaultConfig, function(err, result) {
   if (err) {
     logger.erase('lineLeft');
-
-    if (err.filepath) {
-      errLog('\rError in ' + path.relative(cwd, err.filepath) + ':');
-    }
-
-    errLog((err.message || err.toString()).split('\n').map(function(line) {
-      return '  ' + line;
-    }).join('\n'));
+    errLog(err.message || err.toString());
     return;
   }
 
   if (result) {
-    infoFiles(err, result);
+    infoFiles(result);
   }
 
   if (!argv.watch && err) {
