@@ -89,7 +89,7 @@ var fixedDest = argv.dest || 'build',
 
 var defaultConfig = {
   cwd: cwd,
-  src: fixedSrc,
+  src: '{' + fixedSrc.join(',') + '}/**/*',
   dest: path.join(cwd, fixedDest, 'dist'),
   cache: path.join(cwd, fixedDest, 'index.json'),
   public: path.join(cwd, fixedDest, 'dist'),
@@ -271,7 +271,7 @@ function exec(onError) {
 }
 
 logger.getLogger()
-  .INFO('{ok|Processing sources from `%s`}', path.relative(cwd, defaultConfig.src.join(', ')))
+  .INFO('{ok|Processing sources from `%s`}', path.relative(cwd, defaultConfig.src))
   .INFO('{ok|Writting files to `%s`}', path.relative(cwd, defaultConfig.dest));
 
 process.on('SIGINT', function() {
