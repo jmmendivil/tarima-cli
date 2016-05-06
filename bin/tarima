@@ -5,9 +5,10 @@ var path = require('path'),
 
 var argv = minimist(process.argv.slice(2), {
   boolean: ['debug', 'force', 'quiet', 'watch', 'verbose', 'server', 'open'],
-  string: ['map', 'only', 'exclude', 'port', 'proxy', 'browser', 'globals', 'config', 'plugins'],
+  string: ['map', 'only', 'exclude', 'dest', 'port', 'proxy', 'browser', 'globals', 'config', 'plugins'],
   alias: {
     q: 'quiet',
+    D: 'dest',
     c: 'config',
     v: 'version',
     V: 'verbose',
@@ -42,6 +43,7 @@ if (argv.help) {
   logger.writeln(function() {/*---
 OPTIONS:
   -q, --quiet     Disable all logs
+  -D, --dest      Destination directory
   -c, --config    Use configuration file
   -l, --plugins   Load external modules as plugins (e.g. -l foo,bar)
   -V, --verbose   Increase log information
@@ -82,12 +84,12 @@ var run = require('../lib'),
 var cwd = process.cwd(),
     pkg = path.join(cwd, 'package.json');
 
-var fixedSrc = argv._[0] || 'src',
-    fixedDest = argv._[1] || 'build';
+var fixedDest = argv.dest || 'build',
+    fixedSrc = argv._.length ? argv._ : ['src'];
 
 var defaultConfig = {
   cwd: cwd,
-  src: path.join(cwd, fixedSrc),
+  src: fixedSrc,
   dest: path.join(cwd, fixedDest, 'dist'),
   cache: path.join(cwd, fixedDest, 'index.json'),
   public: path.join(cwd, fixedDest, 'dist'),
@@ -269,7 +271,7 @@ function exec(onError) {
 }
 
 logger.getLogger()
-  .INFO('{ok|Processing sources from `%s`}', path.relative(cwd, defaultConfig.src))
+  .INFO('{ok|Processing sources from `%s`}', path.relative(cwd, defaultConfig.src.join(', ')))
   .INFO('{ok|Writting files to `%s`}', path.relative(cwd, defaultConfig.dest));
 
 process.on('SIGINT', function() {
