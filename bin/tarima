@@ -87,9 +87,12 @@ var cwd = process.cwd(),
 var fixedDest = argv.dest || 'build',
     fixedSrc = argv._.length ? argv._ : ['src'];
 
+// normalize sources
+fixedSrc = (fixedSrc.length > 1 ? '{' + fixedSrc.join(',') + '}' : fixedSrc[0]) + '/**/*';
+
 var defaultConfig = {
   cwd: cwd,
-  src: '{' + fixedSrc.join(',') + '}/**/*',
+  src: fixedSrc,
   dest: path.join(cwd, fixedDest, 'dist'),
   cache: path.join(cwd, fixedDest, 'index.json'),
   public: path.join(cwd, fixedDest, 'dist'),
@@ -271,7 +274,7 @@ function exec(onError) {
 }
 
 logger.getLogger()
-  .INFO('{ok|Processing sources from `%s`}', path.relative(cwd, defaultConfig.src))
+  .INFO('{ok|Processing sources from `%s`}', fixedSrc)
   .INFO('{ok|Writting files to `%s`}', path.relative(cwd, defaultConfig.dest));
 
 process.on('SIGINT', function() {
