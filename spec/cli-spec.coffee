@@ -1,16 +1,16 @@
 describe 'CLI', ->
-  describe 'running without arguments', ->
-    beforeEach cmd
+  # describe 'running without arguments', ->
+  #   beforeEach cmd
 
-    it 'should exit with 1', ->
-      expect(cmd.exitStatus).toEqual 1
+  #   it 'should exit with 1', ->
+  #     expect(cmd.exitStatus).toEqual 1
 
-    it 'should not print to the stdout', ->
-      expect(cmd.stdout).toContain 'Processing files from'
-      expect(cmd.stdout).toContain 'Compiling to'
+  #   it 'should not print to the stdout', ->
+  #     expect(cmd.stdout).toContain 'Processing files from'
+  #     expect(cmd.stdout).toContain 'Compiling to'
 
-    it 'should report the missing directory', ->
-      expect(cmd.stderr).toMatch /Missing.*directory/
+  #   it 'should report the missing directory', ->
+  #     expect(cmd.stderr).toMatch /Missing.*directory/
 
   describe 'asking for --help', ->
     beforeEach (done) ->
