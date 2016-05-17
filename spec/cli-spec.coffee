@@ -6,11 +6,11 @@ describe 'CLI', ->
       expect(cmd.exitStatus).toEqual 1
 
     it 'should not print to the stdout', ->
-     expect(cmd.stdout).toContain 'Processing files from'
-     expect(cmd.stdout).toContain 'Compiling to'
+      expect(cmd.stdout).toContain 'Processing files from'
+      expect(cmd.stdout).toContain 'Compiling to'
 
     it 'should report the missing directory', ->
-     expect(cmd.stderr).toMatch /Missing.*directory/
+      expect(cmd.stderr).toMatch /Missing.*directory/
 
   describe 'asking for --help', ->
     beforeEach (done) ->
