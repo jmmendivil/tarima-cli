@@ -39,11 +39,11 @@ var die = process.exit.bind(process);
 var thisPkg = require(path.join(__dirname, '../package.json'));
 
 if (argv.help) {
-  logger.writeln('USAGE:\n  ' + Object.keys(thisPkg.bin)[0] + ' [SRC] [DEST] [OPTIONS]');
+  logger.writeln('USAGE:\n  ' + Object.keys(thisPkg.bin)[0] + ' [...] [OPTIONS]');
   logger.writeln(function() {/*---
 OPTIONS:
+  -D, --dest      Output dirnpm test
   -q, --quiet     Disable all logs
-  -D, --dest      Destination directory
   -c, --config    Use configuration file
   -l, --plugins   Load external modules as plugins (e.g. -l foo,bar)
   -V, --verbose   Increase log information
