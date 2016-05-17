@@ -31,4 +31,4 @@ describe 'CLI', ->
       cmd 'example', done
 
     it 'should copy unsupported sources', ->
-      expect(read('build/dist/other/blank.txt')).toEqual "TEXT\n"
+      expect(read('build/dist/example/other/blank.txt')).toEqual "TEXT\n"
