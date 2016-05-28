@@ -24,7 +24,7 @@
     "node-notifier": "^4.5.0",
     "pretty-ms": "^2.1.0",
     "siguiente": "^0.3.1",
-    "tarima": "git+https://github.com/gextech/tarima.git#next"
+    "tarima": "^1.0.0"
   },
   "devDependencies": {
     "codecov": "^1.0.1",
