@@ -7,6 +7,7 @@ var argv = minimist(process.argv.slice(2), {
   boolean: ['debug', 'force', 'quiet', 'watch', 'verbose', 'server', 'open'],
   string: ['map', 'only', 'exclude', 'dest', 'port', 'proxy', 'browser', 'globals', 'config', 'plugins'],
   alias: {
+    b: 'bundle',
     q: 'quiet',
     D: 'dest',
     c: 'config',
@@ -44,7 +45,9 @@ if (argv.help) {
 OPTIONS:
   -D, --dest      Output dirnpm test
   -q, --quiet     Disable all logs
-  -c, --config    Use configuration file
+  -c, --config    Use configuration file (e.g. -c ./config.js)
+  -b, --bundle    When enabled, setup all scripts as entries for bundling purposes,
+                  it can be boolean or glob expression (e.g. -b "**\/main\/*.js")
   -l, --plugins   Load external modules as plugins (e.g. -l foo,bar)
   -V, --verbose   Increase log information
   -x, --exclude   Filter out sources using globs (e.g. -x test/broken -x .coffee)
@@ -96,8 +99,9 @@ var defaultConfig = {
   dest: path.join(cwd, fixedDest, 'dist'),
   cache: path.join(cwd, fixedDest, 'index.json'),
   public: path.join(cwd, fixedDest, 'dist'),
+  bundle: argv.bundle,
   filter: [],
-  plugins: argv.plugins ? argv.plugins.split(',') : [],
+  plugins: argv.plugins ? fixedArray(argv.plugins) : [],
   force: argv.force,
   watch: argv.watch,
   server: argv.server,
