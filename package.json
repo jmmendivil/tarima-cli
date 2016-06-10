@@ -14,9 +14,10 @@
     "test": "npm run dev:lint && npm run dev:spec"
   },
   "dependencies": {
-    "chokidar": "^1.5.1",
+    "chokidar": "^1.5.2",
     "cli-color": "^1.1.0",
     "es6-promise": "^3.2.1",
+    "eslint": "^2.11.1",
     "fs-extra": "^0.26.5",
     "glob": "^7.0.3",
     "micromatch": "^2.3.8",
@@ -24,7 +25,7 @@
     "node-notifier": "^4.5.0",
     "pretty-ms": "^2.1.0",
     "siguiente": "^0.3.1",
-    "tarima": "^1.0.0"
+    "tarima": "^1.0.1"
   },
   "devDependencies": {
     "codecov": "^1.0.1",
