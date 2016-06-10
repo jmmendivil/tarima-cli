@@ -43,7 +43,7 @@ if (argv.help) {
   logger.writeln('USAGE:\n  ' + Object.keys(thisPkg.bin)[0] + ' [...] [OPTIONS]');
   logger.writeln(function() {/*---
 OPTIONS:
-  -D, --dest      Output dirnpm test
+  -D, --dest      Output directory
   -q, --quiet     Disable all logs
   -c, --config    Use configuration file (e.g. -c ./config.js)
   -b, --bundle    When enabled, setup all scripts as entries for bundling purposes,
@@ -96,9 +96,9 @@ fixedSrc = (fixedSrc.length > 1 ? '{' + fixedSrc.join(',') + '}' : fixedSrc[0]) 
 var defaultConfig = {
   cwd: cwd,
   src: fixedSrc,
-  dest: path.join(cwd, fixedDest, 'dist'),
+  dest: path.join(cwd, fixedDest),
   cache: path.join(cwd, fixedDest, 'index.json'),
-  public: path.join(cwd, fixedDest, 'dist'),
+  public: path.join(cwd, fixedDest),
   bundle: argv.bundle,
   filter: [],
   plugins: argv.plugins ? fixedArray(argv.plugins) : [],
@@ -279,7 +279,7 @@ function exec(onError) {
 
 logger.getLogger()
   .INFO('{log|Processing sources from `%s`}', fixedSrc)
-  .INFO('{log|Writting files to `%s`}', path.relative(cwd, defaultConfig.dest));
+  .INFO('{log|Writting files to `%s`}', path.relative(cwd, defaultConfig.dest) || '.');
 
 process.on('SIGINT', function() {
   if (child) {
