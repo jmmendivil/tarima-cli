@@ -287,14 +287,18 @@ process.on('SIGINT', function() {
     child.kill('SIGINT');
   }
 
-  process.exit();
+  die();
 });
 
 run(defaultConfig, function(err, result) {
   if (err) {
     logger.erase('lineLeft');
     errLog(err.message || err.toString());
-    // TODO: print stack if verbose?
+
+    if (!(argv.server || argv.watch)) {
+      die(1);
+    }
+
     return;
   }
 
