@@ -289,7 +289,7 @@ function exec(onError) {
 }
 
 logger.getLogger()
-  .INFO('{log|Processing sources from `%s`}', fixedSrc)
+  .INFO('{log|Processing sources from `%s`}', defaultConfig.src)
   .INFO('{log|Writting files to `%s`}', path.relative(cwd, defaultConfig.dest) || '.');
 
 process.on('SIGINT', function() {
