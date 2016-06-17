@@ -5,7 +5,7 @@ var path = require('path'),
 
 var argv = minimist(process.argv.slice(2), {
   boolean: ['debug', 'force', 'quiet', 'watch', 'verbose', 'server', 'open'],
-  string: ['map', 'only', 'exclude', 'dest', 'port', 'proxy', 'browser', 'globals', 'config', 'plugins'],
+  string: ['map', 'only', 'exclude', 'dest', 'port', 'proxy', 'browser', 'globals', 'config', 'plugins', 'extensions'],
   alias: {
     b: 'bundle',
     q: 'quiet',
@@ -25,7 +25,8 @@ var argv = minimist(process.argv.slice(2), {
     p: 'port',
     P: 'proxy',
     B: 'browser',
-    G: 'globals'
+    G: 'globals',
+    E: 'extensions'
   },
   '--': true
 });
@@ -43,31 +44,32 @@ if (argv.help) {
   logger.writeln('USAGE:\n  ' + Object.keys(thisPkg.bin)[0] + ' [...] [OPTIONS]');
   logger.writeln(function() {/*---
 OPTIONS:
-  -D, --dest      Output directory
-  -q, --quiet     Disable all logs
-  -c, --config    Use configuration file (e.g. -c ./config.js)
-  -b, --bundle    When enabled, setup all scripts as entries for bundling purposes,
-                  it can be boolean or glob expression (e.g. -b "**\/main\/*.js")
-  -l, --plugins   Load external modules as plugins (e.g. -l foo,bar)
-  -V, --verbose   Increase log information
-  -x, --exclude   Filter out sources using globs (e.g. -x test/broken -x .coffee)
-                  Example patterns:
-                    - *foo     -> !*foo
-                    - .bar     -> !**\/*.bar
-                    - x.y      -> !**\/x.y
-                    - foo      -> !**\/foo/**
-                    - foo/bar  -> !**\/foo\/bar/**
-  -y, --only      Filter out non-matching sources using String.prototype.indexOf()
-  -d, --debug     Enable compileDebug flag for some engines
-  -f, --force     Compile all sources always
-  -w, --watch     Enable file watching for all sources
-  -s, --server    Enable web-server support (requires tarima-browser-sync)
-                  You can configure this through `serverOptions`
-  -o, --open      Enable to open your default (or configured) --browser
-  -p, --port      Set a different port for BrowserSync (default: 3000)
-  -P, --proxy     Enable proxying instead --server (e.g. -P localhost:8080)
-  -B, --browser   Set a custom browser when --open is specified
-  -G, --globals   Set custom values to inject on compiled scripts (e.g. -G FOO=BAR)
+  -D, --dest        Output directory
+  -q, --quiet       Disable all logs
+  -c, --config      Use configuration file (e.g. -c ./config.js)
+  -b, --bundle      When enabled, setup all scripts as entries for bundling purposes,
+                    it can be boolean or glob expression (e.g. -b "**\/main\/*.js")
+  -l, --plugins     Load external modules as plugins (e.g. -l foo,bar)
+  -V, --verbose     Increase log information
+  -x, --exclude     Filter out sources using globs (e.g. -x test/broken -x .coffee)
+                    Example patterns:
+                      - *foo     -> !*foo
+                      - .bar     -> !**\/*.bar
+                      - x.y      -> !**\/x.y
+                      - foo      -> !**\/foo/**
+                      - foo/bar  -> !**\/foo\/bar/**
+  -y, --only        Filter out non-matching sources using String.prototype.indexOf()
+  -d, --debug       Enable compileDebug flag for some engines
+  -f, --force       Compile all sources always
+  -w, --watch       Enable file watching for all sources
+  -s, --server      Enable web-server support (requires tarima-browser-sync)
+                    You can configure this through `serverOptions`
+  -o, --open        Enable to open your default (or configured) --browser
+  -p, --port        Set a different port for BrowserSync (default: 3000)
+  -P, --proxy       Enable proxying instead --server (e.g. -P localhost:8080)
+  -B, --browser     Set a custom browser when --open is specified
+  -G, --globals     Set custom values to inject on compiled scripts (e.g. -G FOO=BAR)
+  -E, --extensions  Mappings for custom extensions (e.g. -E js:es6 -E css:post)
 ---*/}.toString().match(/---([\s\S]+)---/)[1].replace(/\\/g, ''));
   die(1);
 }
@@ -99,7 +101,7 @@ var defaultConfig = {
   dest: path.join(cwd, fixedDest),
   cache: path.join(cwd, fixedDest, 'index.json'),
   public: path.join(cwd, fixedDest),
-  bundle: argv.bundle,
+  bundle: argv.bundle === true ? '**' : argv.bundle,
   filter: [],
   plugins: argv.plugins ? fixedArray(argv.plugins) : [],
   force: argv.force,
@@ -115,7 +117,8 @@ var defaultConfig = {
     errIcon: path.join(__dirname, 'err.png')
   },
   bundleOptions: {
-    globals: {}
+    globals: {},
+    extensions: {}
   }
 };
 
@@ -189,6 +192,14 @@ if (argv.globals) {
     var parts = value.split('=');
 
     defaultConfig.bundleOptions.globals[parts[0]] = fixedValue(parts[1]);
+  });
+}
+
+if (argv.extensions) {
+  $.toArray(argv.extensions).forEach(function(exts) {
+    var parts = exts.split(':');
+
+    defaultConfig.bundleOptions.extensions[parts[0]] = parts[1];
   });
 }
 
