@@ -5,7 +5,7 @@ var path = require('path'),
 
 var argv = minimist(process.argv.slice(2), {
   boolean: ['debug', 'force', 'quiet', 'watch', 'verbose', 'server', 'open'],
-  string: ['map', 'only', 'exclude', 'dest', 'port', 'proxy', 'browser', 'globals', 'config', 'plugins', 'extensions'],
+  string: ['map', 'only', 'exclude', 'dest', 'port', 'proxy', 'browser', 'globals', 'plugins', 'extensions'],
   alias: {
     b: 'bundle',
     q: 'quiet',
@@ -47,6 +47,7 @@ OPTIONS:
   -D, --dest        Output directory
   -q, --quiet       Disable all logs
   -c, --config      Use configuration file (e.g. -c ./config.js)
+                    You may also specify a suffix, e.g. -c DEV will map to ./tarima.DEV.{js,json}
   -b, --bundle      When enabled, setup all scripts as entries for bundling purposes,
                     it can be boolean or glob expression (e.g. -b "**\/main\/*.js")
   -l, --plugins     Load external modules as plugins (e.g. -l foo,bar)
@@ -134,8 +135,28 @@ if ($.isFile(pkg)) {
   });
 }
 
-if ($.isFile(argv.config)) {
-  $.merge(defaultConfig, $.readJSON(argv.config) || {});
+// support for tarima.CONFIG.{js,json}
+var configFile = argv.config === true ? 'config' : argv.config;
+
+if (configFile && configFile.indexOf('.') === -1) {
+  var fixedConfig = path.join(cwd, 'tarima.' + configFile);
+  [fixedConfig + '.js', fixedConfig + '.json'].forEach(function(file) {
+    if ($.isFile(file)) {
+      configFile = file;
+    }
+  });
+}
+
+if (configFile) {
+  if (!$.isFile(configFile)) {
+    process.stderr.write('\r' + $.color.red('Missing `' + configFile + '` file') + '\n');
+    die(1);
+  }
+
+  logger.getLogger()
+    .INFO('{log|Loading tarima configuration from `%s`}', path.relative(cwd, configFile));
+
+  $.merge(defaultConfig, require(configFile) || {});
 }
 
 function fixedArray(obj) {
