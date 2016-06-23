@@ -235,21 +235,23 @@ function errLog(message) {
 }
 
 function infoFiles(result) {
-  if (argv.watch) {
-    if (result.output.length) {
-      $.notify(result.output.length + ' file' + (result.output.length !== 1 ? 's' : '') + ' in ' + result.elapsed,
-        defaultConfig.notifications.title,
-        defaultConfig.notifications.okIcon);
+  if (argv.watch && result.output.length) {
+    $.notify(result.output.length + ' file' + (result.output.length !== 1 ? 's' : '') + ' in ' + result.elapsed,
+      defaultConfig.notifications.title,
+      defaultConfig.notifications.okIcon);
+  }
+
+  if (!(argv.watch || argv.server)) {
+    if (!result.output.length) {
+      logger.getLogger()
+        .INFO('{log|Without changes (%s)}', result.elapsed);
+    } else {
+      logger.getLogger()
+        .INFO('{log|%s file%s written in %s}',
+          result.output.length,
+          result.output.length !== 1 ? 's' : '',
+          result.elapsed);
     }
-  } else if (!result.output.length) {
-    logger.getLogger()
-      .INFO('{log|Without changes (%s)}', result.elapsed);
-  } else {
-    logger.getLogger()
-      .INFO('{log|%s file%s written in %s}',
-        result.output.length,
-        result.output.length !== 1 ? 's' : '',
-        result.elapsed);
   }
 }
 
@@ -322,6 +324,8 @@ process.on('SIGINT', function() {
   die();
 });
 
+var ran;
+
 run(defaultConfig, function(err, result) {
   if (err) {
     logger.erase('lineLeft');
@@ -334,13 +338,13 @@ run(defaultConfig, function(err, result) {
     return;
   }
 
+  if (result && result.output) {
+    infoFiles(result);
+  }
+
   if (argv.server && !argv.watch) {
     logger.getLogger()
       .INFO('{log|Nothing to watch... [press CTRL-C to quit]}');
-  }
-
-  if (result && result.output) {
-    infoFiles(result);
   }
 
   if (!argv.watch && err) {
@@ -351,7 +355,7 @@ run(defaultConfig, function(err, result) {
     die(1);
   }
 
-  if (result && argv.watch) {
+  if (!ran && result && argv.watch) {
     logger.getLogger()
       .INFO('{log|Waiting for changes... [press CTRL-C to quit]}');
   }
@@ -359,4 +363,6 @@ run(defaultConfig, function(err, result) {
   if (cmd.length && !err) {
     exec(this.emit.bind(null, 'error'));
   }
+
+  ran = true;
 });
